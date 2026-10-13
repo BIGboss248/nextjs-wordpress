@@ -16,6 +16,18 @@
     "Category": "TOOL",
     "Instruction": "Never run 'codebase-memory-mcp cli get_architecture' without explicit --repo-path or when MCP tool is available - prevents indefinite CLI hangs.",
     "Why": "CLI get_architecture hangs when run without explicit project parameters"
+  },
+  {
+    "Rule_number": 4,
+    "Category": "TOOL",
+    "Instruction": "Always add '--pass-with-no-tests' to 'playwright test' in package.json scripts - ensures CI test suites pass when test directories are initialized without dummy tests.",
+    "Why": "Playwright exits with code 1 on empty test directories unless --pass-with-no-tests is passed"
+  },
+  {
+    "Rule_number": 5,
+    "Category": "ARCH",
+    "Instruction": "Never use 'next start' when 'output: standalone' is configured in next.config.ts - use 'node .next/standalone/server.js' or 'pnpm run dev' in Playwright webServer and package.json start script.",
+    "Why": "Next.js standalone output forbids 'next start' and requires running node on the standalone server"
   }
 ]
 
