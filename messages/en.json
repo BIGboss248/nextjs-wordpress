@@ -1,0 +1,11 @@
+{
+  "common": {
+    "welcome": "Welcome to Next.js",
+    "description": "A high-performance Next.js application",
+    "navigation": {
+      "home": "Home",
+      "about": "About"
+    }
+  }
+}
+

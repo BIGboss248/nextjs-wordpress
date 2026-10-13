@@ -1,0 +1,21 @@
+[
+  {
+    "Rule_number": 1,
+    "Category": "TOOL",
+    "Instruction": "Always use 'react-transition-progress' instead of '@vercel/react-transition-progress' - '@vercel/react-transition-progress' does not exist on npm.",
+    "Why": "package naming correction"
+  },
+  {
+    "Rule_number": 2,
+    "Category": "TOOL",
+    "Instruction": "Always add '<rootDir>/.agents/' to testPathIgnorePatterns in jest.config.ts - prevents Jest from picking up example tests in .agents/skills.",
+    "Why": "prevent test runner from executing agent skill example templates"
+  },
+  {
+    "Rule_number": 3,
+    "Category": "TOOL",
+    "Instruction": "Never run 'codebase-memory-mcp cli get_architecture' without explicit --repo-path or when MCP tool is available - prevents indefinite CLI hangs.",
+    "Why": "CLI get_architecture hangs when run without explicit project parameters"
+  }
+]
+

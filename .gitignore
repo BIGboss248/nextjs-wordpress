@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.pnpm-store/
+
+# Testing
+coverage/
+test-results/
+playwright-report/
+blob-report/
+.playwright-mcp/
+
+# Next.js build output
+.next/
+out/
+build/
+dist/
+
+# Codebase Memory Knowledge Graph
+.codebase-memory/
+
+# Environment files
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug and OS logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
+
+# IDE
+.idea/
+*.swp
+*.swo
+
