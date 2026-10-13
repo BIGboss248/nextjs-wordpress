@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "skills": {
+    "ag-customizer": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ag-customizer/SKILL.md",
+      "computedHash": "aaca50baf4b547e83cbeb10f2d400fa6ae501187d8aaa9d1b95c9a445370f97a"
+    },
+    "agent-chatrooms": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/agent-chatrooms/SKILL.md",
+      "computedHash": "496a039fc3bb88ffda2afca2a5ef6853ded53c115a4ba059d4e4d33da6f92c38"
+    },
+    "codebase-memory": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/codebase-memory/SKILL.md",
+      "computedHash": "a206ed93a159ccd4cc87af1613c70a13d0b444e43046ba5c36dc20e3a813843a"
+    },
+    "component-design": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/component-design/SKILL.md",
+      "computedHash": "817fc61625f9d4e6b97bc7bdcd4046fba5a58a8e036078983d2fbc37d1a81a42"
+    },
+    "headless-woocommerce-api": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/headless-woocommerce-api/SKILL.md",
+      "computedHash": "cddc60f9c432bd88fde565932b094be1504bf3cd032f47bda3e55b7ff4ebab87"
+    },
+    "multi-agent-chrome": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/multi-agent-chrome-skill/SKILL.md",
+      "computedHash": "5e1d2023e3dfc6f5c1dcfd80fc3c3b1a933ac87686f9c4e4ce7dc49b7c176424"
+    },
+    "nextjs-adversarial-qa": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nextjs-adversarial-qa/SKILL.md",
+      "computedHash": "a6db4a8ef3581d9ef0d6be8c8316d40e60225270ed64f927b10cdc4b9ffcc9f9"
+    },
+    "nextjs-component-dev": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nextjs-component-dev/SKILL.md",
+      "computedHash": "4e908bdbb128e5cadd390a37d11fe585c05deffa78ec2a8370acae23a2261f52"
+    },
+    "nextjs-dev-setup": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nextjs-dev-setup/SKILL.md",
+      "computedHash": "45cfdcfab85a09e5f98573164809127f8cfe11d1daa5792024865448f49373ea"
+    },
+    "nextjs-healthcheck": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nextjs-healthcheck/SKILL.md",
+      "computedHash": "8606952a4977643de9556f4f0c07ff6654bbdd855b8d4786a7c98feebb5d395e"
+    },
+    "nextjs-i18n-setup": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nextjs-i18n-setup/SKILL.md",
+      "computedHash": "a9bb904afe83fa2f846d0763fb06a11031dab3256377a415e52a2c67ecb26818"
+    },
+    "nextjs-i18n-usage": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nextjs-i18n-usage/SKILL.md",
+      "computedHash": "51cdd229bbd5f02e85a26bfdde7b7b6e5397207a296fa55e0116e686834d545c"
+    },
+    "nextjs-otel": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nextjs-otel/SKILL.md",
+      "computedHash": "05c850ec1937f1795bf5c5c5cfafb785f4ea2b27c52a97f3151d2c9e2ed9da34"
+    },
+    "nextjs-page-dev": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nextjs-page-dev/SKILL.md",
+      "computedHash": "54690ea9b9b082868943a8a199429b69642cd3ad1a09647d4bdd8ebffccaab4c"
+    },
+    "nextjs-plan": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nextjs-plan/SKILL.md",
+      "computedHash": "717dd8140d7b853129075b3c3798fa4ee9ba58623d732612ba0f794ae80774ba"
+    },
+    "nextjs-storybook-story": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nextjs-storybook-story/SKILL.md",
+      "computedHash": "a14889b3fb27d01de23915fc838f1eaa9a624b2bb8a437ec66291257213f164f"
+    },
+    "nextjs-woocommerce": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nextjs-woocommerce/SKILL.md",
+      "computedHash": "7abbc682b3f39b9aee9ad1805e09a7d6dd05c1178d6bc884904cd35744c57530"
+    },
+    "self-repair": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/self-repair/SKILL.md",
+      "computedHash": "97c79ad48dd7e372542d92e5a4fe67f3ca15abfb08b55212de83d0003250fb47"
+    },
+    "seo-ops": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/seo-ops/SKILL.md",
+      "computedHash": "ad33d6a2692c3539ccf81959afea193e1895b7892b67b19134eaa1b8ef1e50ea"
+    },
+    "setup-repository": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/setup-repository/SKILL.md",
+      "computedHash": "3314011fa8076ce4dc1e488e7e1ce1ba1a3c03d4b8a58ef81dca25f98572c087"
+    },
+    "skill-creator": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/skill-creator/SKILL.md",
+      "computedHash": "889c2675cedc9d77db61073f57da95fb6a93144692ae09ef6dc723d106b3279f"
+    },
+    "stitch-design": {
+      "source": "BIGboss248/skills",
+      "sourceType": "github",
+      "skillPath": "skills/stitch-design/SKILL.md",
+      "computedHash": "6816ad836d01854b3605d1c37ad2e4da29c8c3e11cbd2b2ab795ead7d1bc4ed5"
+    }
+  }
+}
