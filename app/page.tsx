@@ -12,8 +12,14 @@ export default function HomePage() {
         </p>
         <div className="flex justify-center gap-4 pt-4">
           <Link
-            href="/api/health"
+            href="/products"
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition hover:opacity-90"
+          >
+            WooCommerce Catalog
+          </Link>
+          <Link
+            href="/api/health"
+            className="rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
           >
             Health Probe
           </Link>

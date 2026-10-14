@@ -26,8 +26,13 @@
   {
     "Rule_number": 5,
     "Category": "ARCH",
-    "Instruction": "Never use 'next start' when 'output: standalone' is configured in next.config.ts - use 'node .next/standalone/server.js' or 'pnpm run dev' in Playwright webServer and package.json start script.",
-    "Why": "Next.js standalone output forbids 'next start' and requires running node on the standalone server"
+    "Instruction": "In Next.js projects with 'output: standalone', configure 'pnpm run dev' in Playwright webServer (playwright.config.ts.template) - prevents 'next start does not work with output: standalone' crashes during E2E testing in CI.",
+    "Why": "Next.js standalone configuration forbids 'next start', while 'pnpm run dev' reliably boots across CI and local environments"
+  },
+  {
+    "Rule_number": 6,
+    "Category": "PROCESS",
+    "Instruction": "When updating skills in D:\\Scripts\\Obsidian\\skills for Playwright standalone compatibility, update 'skills/nextjs-dev-setup/resources/templates/playwright.config.ts.template' with 'command: \"pnpm run dev\"', then stage, commit, and push the Obsidian repository so consumer projects receive the fix via 'npx skills'.",
+    "Why": "ensures remote skills repository propagates the verified Playwright webServer fix to consumers via npx skills"
   }
 ]
-

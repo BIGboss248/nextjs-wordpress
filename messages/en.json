@@ -4,8 +4,24 @@
     "description": "A high-performance Next.js application",
     "navigation": {
       "home": "Home",
-      "about": "About"
+      "about": "About",
+      "products": "WooCommerce Products"
     }
+  },
+  "woocommerce": {
+    "title": "WooCommerce Store Catalog",
+    "subtitle": "Live products queried from WooCommerce GraphQL API",
+    "endpoint": "API Endpoint",
+    "status": "Connection Status",
+    "connected": "Connected",
+    "disconnected": "Unreachable / Pending Setup",
+    "empty": "Connected to GraphQL, but no products were found in the catalog.",
+    "inStock": "In Stock",
+    "outOfStock": "Out of Stock",
+    "category": "Category",
+    "viewDetails": "View Details",
+    "homeLink": "Back to Home",
+    "instructionsTitle": "WooCommerce Setup Requirements"
   }
 }
 
