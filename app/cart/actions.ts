@@ -366,28 +366,74 @@ export async function processCheckoutAction(input?: {
   }
 }
 
-/**
- * Retrieve the native WooCommerce checkout URL.
- * If line items are present, includes the primary product ID and quantity
- * (?add-to-cart=ID&quantity=QTY) to seed/initialize the native WooCommerce session.
- */
-export async function getCheckoutUrlAction(primaryItem?: {
+export interface CartItemTransfer {
   databaseId: number;
   quantity: number;
   variationId?: number;
-}): Promise<{ url: string }> {
+}
+
+/**
+ * Retrieve the native WooCommerce checkout URL.
+ * Passes all cart items via `fill_cart` (for multi-product transfer) and `add-to-cart`
+ * (for native single-product fallback) directly to the WooCommerce checkout page,
+ * allowing the user to select an address and see dynamic shipping calculations.
+ */
+export async function getCheckoutUrlAction(
+  items?: CartItemTransfer[] | CartItemTransfer,
+  customerInfo?: {
+    email?: string;
+    phone?: string;
+    firstName?: string;
+    lastName?: string;
+  }
+): Promise<{ url: string }> {
   const base = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://shop.meetjamali.com';
   const cleanBase = base.replace(/\/$/, '');
 
-  if (primaryItem && primaryItem.databaseId) {
-    const varParam = primaryItem.variationId ? `&variation_id=${primaryItem.variationId}` : '';
+  const itemList: CartItemTransfer[] = Array.isArray(items)
+    ? items
+    : items && items.databaseId
+    ? [items]
+    : [];
+
+  if (itemList.length === 0) {
     return {
-      url: `${cleanBase}/cart/?add-to-cart=${primaryItem.databaseId}&quantity=${primaryItem.quantity || 1}${varParam}`,
+      url: `${cleanBase}/checkout/`,
     };
   }
 
+  const primaryItem = itemList[0];
+  const fillCartParam = itemList
+    .map(
+      (item) =>
+        `${item.databaseId}:${item.quantity || 1}${
+          item.variationId ? `:${item.variationId}` : ''
+        }`
+    )
+    .join(',');
+
+  const params = new URLSearchParams();
+
+  // Primary product fallback for core WooCommerce ?add-to-cart=
+  if (primaryItem.databaseId) {
+    params.set('add-to-cart', String(primaryItem.databaseId));
+    params.set('quantity', String(primaryItem.quantity || 1));
+    if (primaryItem.variationId) {
+      params.set('variation_id', String(primaryItem.variationId));
+    }
+  }
+
+  // Multi-item transfer parameter
+  params.set('fill_cart', fillCartParam);
+
+  // Pre-populate customer contact details if available
+  if (customerInfo?.email) params.set('billing_email', customerInfo.email);
+  if (customerInfo?.phone) params.set('billing_phone', customerInfo.phone);
+  if (customerInfo?.firstName) params.set('billing_first_name', customerInfo.firstName);
+  if (customerInfo?.lastName) params.set('billing_last_name', customerInfo.lastName);
+
   return {
-    url: `${cleanBase}/checkout`,
+    url: `${cleanBase}/checkout/?${params.toString()}`,
   };
 }
 
