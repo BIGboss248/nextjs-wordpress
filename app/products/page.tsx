@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { Link } from '../components/Link';
+import { CartBadge } from '../components/CartBadge';
+import { AddToCartButton } from './AddToCartButton';
 import { getProducts } from '@/lib/woocommerce/client';
 import { ProductNode } from '@/lib/woocommerce/types';
 
@@ -38,16 +40,19 @@ export default async function ProductsPage() {
             </p>
           </div>
 
-          {/* Connection Status Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border border-border bg-muted">
-            <span
-              className={`h-2.5 w-2.5 rounded-full ${
-                isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
-              }`}
-            />
-            <span>
-              {isConnected ? 'API Connected' : 'Endpoint Pending / Offline'}
-            </span>
+          {/* Cart & Connection Status */}
+          <div className="flex items-center gap-3">
+            <CartBadge />
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border border-border bg-muted">
+              <span
+                className={`h-2.5 w-2.5 rounded-full ${
+                  isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+                }`}
+              />
+              <span>
+                {isConnected ? 'API Connected' : 'Endpoint Pending / Offline'}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -165,6 +170,18 @@ export default async function ProductsPage() {
                         <span className="text-xs text-muted-foreground font-mono">
                           ID: #{product.databaseId}
                         </span>
+                      </div>
+
+                      {/* Add to Cart Action */}
+                      <div className="pt-2">
+                        <AddToCartButton
+                          productId={product.databaseId}
+                          stockStatus={product.stockStatus}
+                          hasPrice={Boolean(product.price)}
+                          productName={product.name}
+                          productType={product.__typename}
+                          variations={product.variations?.nodes}
+                        />
                       </div>
                     </div>
                   </article>

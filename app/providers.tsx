@@ -4,6 +4,7 @@ import * as React from "react";
 import { ProgressBarProvider, ProgressBar } from "react-transition-progress";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
+import { CartProvider } from "@/lib/woocommerce/cart-context";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = React.useState(
@@ -22,7 +23,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <ProgressBar className="fixed top-0 left-0 right-0 z-[9999] h-1 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)] transition-all duration-200" />
       <QueryClientProvider client={queryClient}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
+          <CartProvider>{children}</CartProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </ProgressBarProvider>

@@ -10,12 +10,30 @@ export default function HomePage() {
         <p className="text-lg text-muted-foreground">
           Enterprise App Router development environment configured with Tailwind CSS, Jest, Playwright, Traefik containerization, and Release Please CI/CD.
         </p>
-        <div className="flex justify-center gap-4 pt-4">
+        <div className="flex flex-wrap justify-center gap-4 pt-4">
           <Link
-            href="/products"
+            href="/register"
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition hover:opacity-90"
           >
-            WooCommerce Catalog
+            Customer Sign Up
+          </Link>
+          <Link
+            href="/login"
+            className="rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
+          >
+            Account / Sign In
+          </Link>
+          <Link
+            href="/products"
+            className="rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
+          >
+            Store Catalog
+          </Link>
+          <Link
+            href="/cart"
+            className="rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
+          >
+            Shopping Cart
           </Link>
           <Link
             href="/api/health"

@@ -34,5 +34,23 @@
     "Category": "PROCESS",
     "Instruction": "When updating skills in D:\\Scripts\\Obsidian\\skills for Playwright standalone compatibility, update 'skills/nextjs-dev-setup/resources/templates/playwright.config.ts.template' with 'command: \"pnpm run dev\"', then stage, commit, and push the Obsidian repository so consumer projects receive the fix via 'npx skills'.",
     "Why": "ensures remote skills repository propagates the verified Playwright webServer fix to consumers via npx skills"
+  },
+  {
+    "Rule_number": 7,
+    "Category": "CODE",
+    "Instruction": "In WordPress and WooCommerce WPGraphQL integrations, security filters or core REST authentication hooks may emit an HTTP 403 Forbidden status code on GraphQL requests containing 'Authorization: Bearer <token>' headers for customer/subscriber accounts, even while WPGraphQL successfully resolves and returns complete valid JSON data in the body. The Next.js fetcher must inspect and return 'json.data' when present rather than discarding payloads solely based on '!res.ok'.",
+    "Why": "diagnosed root cause: WordPress emitted HTTP 403 status header for customer role bearer token while returning valid viewer and customer profile data, causing Next.js fetcher to discard user session on page reload"
+  },
+  {
+    "Rule_number": 8,
+    "Category": "CODE",
+    "Instruction": "In WooCommerce JWT and WooGraphQL integrations, validate JWT expiration ('exp') before attaching 'auth_token' Bearer headers to GraphQL requests. Expired tokens must be cleared from cookies and dropped in favor of guest sessions, and the fetcher must retry 401/403 rejected token requests without the token to prevent WordPress from rejecting cart/catalog mutations with HTTP 403 'Internal server error'.",
+    "Why": "diagnosed root cause: WordPress default JWT expiration is 5 minutes while cookie maxAge is 7 days; sending expired Bearer tokens caused WordPress to return HTTP 403 Internal server error on cart mutations"
+  },
+  {
+    "Rule_number": 9,
+    "Category": "ARCH",
+    "Instruction": "In decoupled Next.js and WooCommerce architectures across different origins, browsers block cross-origin session cookies from persisting. When transferring users from the Next.js cart to native WooCommerce checkout, invoke the WooGraphQL 'checkout' mutation with the active 'wc_session' to convert the GraphQL cart into a native order and redirect to the generated 'checkout/order-pay/<id>/?key=...' URL, or seed direct cart URLs using '?add-to-cart=<id>&quantity=<qty>' rather than navigating to a bare '/checkout' URL which loads an empty session.",
+    "Why": "diagnosed root cause: bare redirects to WooCommerce /checkout send no session cookies from localhost/cross-origin frontend, presenting users with an empty cart instead of their selected products"
   }
 ]
