@@ -102,6 +102,9 @@ Before writing or altering any code, the agent **MUST** grill the user to determ
 7. **Static vs. Dynamic De-optimization**: Reading cookies in the root layout or product pages switches Next.js into full SSR dynamic mode. Only read auth cookies inside Server Actions, Route Handlers, or isolated account dashboard sub-trees (`app/login`, `app/account`).
 8. **Polymorphic Fragments**: Direct queries like `products { nodes { price } }` will fail validation in WooGraphQL. Always wrap pricing and variations in `... on SimpleProduct` and `... on VariableProduct`.
 9. **Session Loss**: When adding items to cart, failing to resend the `woocommerce-session` header creates a new empty cart on every mutation.
+10. **Next.js SPA Interception of Relative Backend Redirects**: Calling Next.js `redirect('/my-account?redirect_to=...')` with a relative path during `<Link>` navigation causes Next.js client router to treat `/my-account` as an internal SPA route, yielding a 404 because Next.js has no `app/my-account/page.tsx`. Always use absolute URLs (`https://shop.local/my-account/?...`) with trailing slashes to trigger full browser navigation, and render backend paths as plain `<a>` tags in Link wrappers.
+11. **WooCommerce Account Dashboard Lock-In**: Without a `template_redirect` hook, visiting `/my-account/` while authenticated renders the monolithic Twenty Twenty-Five account dashboard instead of Next.js `/account`. Hook `template_redirect` in an MU-plugin to immediately safe-redirect logged-in users to Next.js `/account`.
+12. **Loss of `redirect_to` in WooCommerce Login Form**: The default WooCommerce `form-login.php` template lacks a `redirect_to` field, stripping query params on POST submission. Hook `woocommerce_login_form_end` and `woocommerce_register_form_end` to inject `<input type="hidden" name="redirect_to" value="..." />`, and ensure `redirect_to` takes precedence over administrator role checks in `woocommerce_login_redirect`.
 
 ---
 

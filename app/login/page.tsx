@@ -1,78 +1,53 @@
 import type { Metadata } from 'next';
-import { Link } from '../components/Link';
-import { LoginForm } from './LoginForm';
-import { UserProfileView } from './UserProfileView';
-import { getAuthSessionAction } from './actions';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
-  title: 'WooCommerce Customer Account & Login | Next.js',
-  description: 'Authenticate and manage your WooCommerce customer profile via Next.js and WPGraphQL',
+  title: 'Sign In | Redirecting to WooCommerce...',
+  description: 'Offloaded authentication redirect to native WooCommerce login portal',
 };
 
-// Force dynamic server rendering so authentication cookies are read on every request
+// Force dynamic server rendering so cookies and searchParams are read per request
 export const dynamic = 'force-dynamic';
 
-export default async function LoginPage() {
-  const session = await getAuthSessionAction();
+interface LoginPageProps {
+  searchParams: Promise<{
+    redirect_to?: string;
+    [key: string]: string | string[] | undefined;
+  }>;
+}
 
-  return (
-    <main className="min-h-screen bg-background text-foreground py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto space-y-8">
-        {/* Navigation Breadcrumb */}
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-foreground transition">
-            ← Home
-          </Link>
-          <span>/</span>
-          <Link href="/products" className="hover:text-foreground transition">
-            Store Catalog
-          </Link>
-          <span>/</span>
-          <span className="text-foreground font-medium">
-            {session.authenticated ? 'Account Profile' : 'Sign In'}
-          </span>
-        </div>
+/**
+ * Headless Login Route:
+ * Offloads authentication directly to native WooCommerce (/my-account/).
+ *
+ * Uses the absolute WordPress URL so that Next.js client-side router
+ * triggers a full native browser navigation rather than attempting an internal SPA route transition.
+ */
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const resolvedParams = await searchParams;
+  let targetRedirect = '/account';
 
-        {/* View Switching: Authenticated Profile vs. Login Form */}
-        {session.authenticated && session.user ? (
-          <UserProfileView
-            user={session.user}
-            customer={session.customer}
-          />
-        ) : (
-          <div className="space-y-8">
-            <div className="space-y-1">
-              <h1 className="text-3xl font-bold tracking-tight">
-                WooCommerce Customer Sign In
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Authenticate securely to access your profile, shipping addresses, and order history.
-              </p>
-            </div>
+  if (typeof resolvedParams?.redirect_to === 'string') {
+    const candidate = resolvedParams.redirect_to.trim();
+    // Prevent open redirect vulnerabilities by strictly allowing internal relative paths
+    if (candidate.startsWith('/') && !candidate.startsWith('//')) {
+      targetRedirect = candidate;
+    }
+  }
 
-            <LoginForm />
-
-            {/* Architecture & Persistence Guide */}
-            <div className="rounded-xl border border-border bg-card p-6 space-y-3">
-              <h3 className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">
-                How Headless WooCommerce Authentication Works
-              </h3>
-
-              <ol className="list-decimal list-inside space-y-2 text-xs text-muted-foreground leading-relaxed">
-                <li>
-                  <strong className="text-foreground">JWT Token Generation:</strong> The login mutation queries WordPress <code>wp-graphql-jwt-authentication</code>, returning a cryptographically signed token.
-                </li>
-                <li>
-                  <strong className="text-foreground">HttpOnly Cookie Storage:</strong> Next.js Server Actions store the token in a secure <code>auth_token</code> cookie inaccessible to browser JavaScript (protecting from XSS).
-                </li>
-                <li>
-                  <strong className="text-foreground">Session Hydration:</strong> On page loads, Server Components automatically query <code>viewer</code> and <code>customer</code> with the cookie, hydrating your orders and profile server-side.
-                </li>
-              </ol>
-            </div>
-          </div>
-        )}
-      </div>
-    </main>
+  const cookieStore = await cookies();
+  const allCookies = cookieStore.getAll();
+  const isLoggedIn = allCookies.some(
+    (c) => c.name.startsWith('wordpress_logged_in_') || c.name === 'auth_token'
   );
+
+  // If already logged in, redirect straight to target destination
+  if (isLoggedIn) {
+    redirect(targetRedirect);
+  }
+
+  // Offload to WordPress WooCommerce login form via absolute URL to force full browser navigation
+  const wpBaseUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://shop.local';
+  redirect(`${wpBaseUrl}/my-account/?redirect_to=${encodeURIComponent(targetRedirect)}`);
 }

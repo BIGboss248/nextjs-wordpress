@@ -28,17 +28,19 @@ flowchart LR
 
 ## Phase 2: Working Customer Login Flow (Offloaded to WordPress)
 
-- [ ] **2.1. Configure `/login` Route in Next.js**
-  - Update `app/login/page.tsx` to redirect unauthenticated visitors to `/my-account?redirect_to=/account` (or referring URL).
+- [x] **2.1. Configure `/login` Route in Next.js**
+  - Updated `app/login/page.tsx` to redirect unauthenticated visitors to `/my-account?redirect_to=/account` (or referring URL).
   - Traefik intercepts `/my-account` (priority 100) and serves native WooCommerce customer login/register form.
-- [ ] **2.2. Implement Customer Dashboard (`app/account/page.tsx`)**
-  - Create `app/account/page.tsx` as a React Server Component.
-  - Forward browser cookies to `http://wordpress/graphql` with `Host: shop.local`.
-  - Query `customer { id firstName email orders(first: 5) { nodes { id orderNumber total status } } }`.
-  - Redirect unauthenticated sessions back to `/login`.
-- [ ] **2.3. Update Navbar / Header Auth Indicator**
-  - Check `cookieStore.has('wordpress_logged_in_...')`.
-  - Render "My Account" (`/account`) when logged in, or "Log In" (`/login`) when logged out.
+  - Authenticated visitors with `wordpress_logged_in_*` cookies bypass the login form and redirect straight to the destination.
+- [x] **2.2. Implement Customer Dashboard (`app/account/page.tsx`)**
+  - Created `app/account/page.tsx` as a React Server Component.
+  - Forwards browser cookies (`wordpress_logged_in_*`, `auth_token`) to `https://shop.local/graphql`.
+  - Queries `GET_USER_PROFILE_QUERY` to retrieve customer profile, billing address, and orders.
+  - Redirects unauthenticated sessions to `/login?redirect_to=/account`.
+  - Fixed WordPress mu-plugin (`headless-redirects.php`) to intercept `/my-account/` via `template_redirect` and safely redirect logged-in visitors to `/account`.
+- [x] **2.3. Update Navbar / Header Auth Indicator**
+  - Updated `app/page.tsx` to read `wordpress_logged_in_*` and `auth_token` cookies.
+  - Dynamically renders "My Account" (`/account`) when logged in and "Account / Sign In" (`/login`) when unauthenticated.
 - [ ] **2.4. Verify Authentication Loop**
   - Test: Visit `/account` $\rightarrow$ redirect to `/my-account` $\rightarrow$ login $\rightarrow$ redirect to Next.js `/account` $\rightarrow$ customer dashboard renders.
 

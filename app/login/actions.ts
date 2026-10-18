@@ -167,8 +167,17 @@ export async function verifyAuthAction(): Promise<VerifyAuthResult> {
  */
 export async function logoutAction(): Promise<{ success: boolean }> {
   const cookieStore = await cookies();
-  cookieStore.delete('auth_token');
-  cookieStore.delete('wc_session');
+  const allCookies = cookieStore.getAll();
+  for (const c of allCookies) {
+    if (
+      c.name.startsWith('wordpress_') ||
+      c.name.startsWith('wp_') ||
+      c.name === 'auth_token' ||
+      c.name === 'wc_session'
+    ) {
+      cookieStore.delete(c.name);
+    }
+  }
   return { success: true };
 }
 

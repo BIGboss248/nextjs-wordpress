@@ -1,6 +1,15 @@
+import { cookies } from "next/headers";
 import { Link } from "./components/Link";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const cookieStore = await cookies();
+  const allCookies = cookieStore.getAll();
+  const isLoggedIn = allCookies.some(
+    (c) => c.name.startsWith("wordpress_logged_in_") || c.name === "auth_token"
+  );
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 text-center">
       <div className="max-w-2xl space-y-6">
@@ -17,12 +26,23 @@ export default function HomePage() {
           >
             Customer Sign Up
           </Link>
-          <Link
-            href="/login"
-            className="rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
-          >
-            Account / Sign In
-          </Link>
+
+          {isLoggedIn ? (
+            <Link
+              href="/account"
+              className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 shadow-sm transition hover:bg-emerald-500/20"
+            >
+              My Account
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
+            >
+              Account / Sign In
+            </Link>
+          )}
+
           <Link
             href="/products"
             className="rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
@@ -46,4 +66,3 @@ export default function HomePage() {
     </main>
   );
 }
-
