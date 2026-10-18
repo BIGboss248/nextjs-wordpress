@@ -1,0 +1,41 @@
+services:
+  nextjs-dev-proxy:
+    image: caddy:alpine
+    container_name: nextjs-dev-proxy
+    restart: unless-stopped
+    command: caddy reverse-proxy --from :80 --to host.docker.internal:3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - my_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=my_network"
+
+      # Next.js HTTP Router (Redirects HTTP to HTTPS)
+      - "traefik.http.routers.nextjs-http.entrypoints=web"
+      - "traefik.http.routers.nextjs-http.rule=Host(`shop.local`)"
+      - "traefik.http.routers.nextjs-http.priority=10"
+      - "traefik.http.routers.nextjs-http.middlewares=nextjs-redirect@docker"
+      - "traefik.http.middlewares.nextjs-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.nextjs-redirect.redirectscheme.permanent=true"
+
+      # Next.js HTTPS Router (Catches all storefront pages: /, /products, /cart, /_next, etc.)
+      - "traefik.http.routers.nextjs-secure.entrypoints=websecure"
+      - "traefik.http.routers.nextjs-secure.rule=Host(`shop.local`)"
+      - "traefik.http.routers.nextjs-secure.priority=10"
+      - "traefik.http.routers.nextjs-secure.tls=true"
+      - "traefik.http.routers.nextjs-secure.tls.certresolver=myresolver"
+      - "traefik.http.routers.nextjs-secure.service=nextjs-service"
+      - "traefik.http.routers.nextjs-secure.middlewares=nextjs-compress@docker,nextjs-stream-headers@docker"
+
+      # Compression & SSE / RSC Streaming headers
+      - "traefik.http.middlewares.nextjs-compress.compress=true"
+      - "traefik.http.middlewares.nextjs-stream-headers.headers.customresponseheaders.X-Accel-Buffering=no"
+
+      # Load balancer target port
+      - "traefik.http.services.nextjs-service.loadbalancer.server.port=80"
+
+networks:
+  my_network:
+    external: true

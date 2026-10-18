@@ -43,6 +43,7 @@ export interface FetchOptions {
   revalidate?: number | false;
   authToken?: string;
   sessionToken?: string;
+  cookie?: string;
 }
 
 export interface WooCommerceFetchResponse<T> {
@@ -66,6 +67,15 @@ export async function fetchWooCommerce<T>(
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
+
+    try {
+      const parsedUrl = new URL(endpoint);
+      headers['Host'] = parsedUrl.host;
+    } catch {}
+
+    if (options.cookie) {
+      headers['Cookie'] = options.cookie;
+    }
 
     if (options.authToken) {
       headers['Authorization'] = `Bearer ${options.authToken}`;

@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 import { execSync } from "node:child_process";
 import packageJson from "./package.json";
 
+// In local development behind Traefik self-signed certificates, allow Node.js fetch() to connect
+if (process.env.NODE_ENV === "development") {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+}
+
 function getGitCommitHash(): string {
   if (process.env.NEXT_PUBLIC_GIT_COMMIT_HASH) {
     return process.env.NEXT_PUBLIC_GIT_COMMIT_HASH;

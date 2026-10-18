@@ -23,17 +23,39 @@ Operational runbook and checklist for architecting, querying, and integrating Ne
 
 ```mermaid
 flowchart TD
-    S1["1. Backend Settings & Universal Client"] --> S2["2. Public Catalog (ISR/SSG)"]
+    G0["0. Grilling & Scope Alignment"] --> S1["1. Local Dev Setup & Universal Client"]
+    S1 --> S2["2. Public Catalog (ISR/SSG)"]
     S2 --> S3["3. Customer Registration (WooGraphQL)"]
     S3 --> S4["4. JWT Authentication (Dual Headers & Cookies)"]
     S4 --> S5["5. Hydrated Customer Profile & Orders"]
     S5 --> S6["6. Cart Session & Native Checkout Bridge"]
 ```
 
-### Phase 1: Environment & Universal Fetcher Setup
+### Phase 0: Interactive Grilling & Scope Alignment (Mandatory First Step)
+Before writing or altering any code, the agent **MUST** grill the user to determine the exact goals for the workflow:
+1. **Scope & Architecture**:
+   - Is this an end-to-end full storefront, or a targeted capability (e.g. product catalog, auth, cart session, or checkout transfer)?
+   - Are you deploying with a single-domain reverse proxy (Traefik) or across decoupled origins?
+2. **Catalog & Product Modeling**:
+   - Does the store use simple products only, or variable products with attributes/swatches?
+3. **Cart & Checkout Behavior**:
+   - Headless cart with native checkout transfer (recommended for custom shipping and Iranian payment gateways), or headless order creation?
+4. **Local Development Needs**:
+   - Do you need the local development environment orchestrated with WordPress and Traefik?
+
+### Phase 1: Local Development Environment & Universal Fetcher Setup
+- [ ] **Unified Domain Routing (Traefik Reverse Proxy)**:
+  - Both Next.js and WordPress run under the same domain (`shop.local` locally, `shop.meetjamali.com` in production) to eliminate third-party cookie blocks.
+  - **WordPress Priority Routing (`priority: 100`)**: Intercepts `/checkout`, `/my-account`, `/wp-admin`, `/wp-login.php`, `/wp-content`, `/wp-includes`, `/wp-json`, and `/graphql`.
+  - **Next.js Priority Routing (`priority: 10`)**: Catch-all for storefront routes (`/`, `/products`, `/cart`, `/_next/*`).
+- [ ] **Local Dev Server Proxy (`docker-compose.dev.yml`)**:
+  - Run Next.js on the host (`pnpm run dev` on port 3000) for hot-reloading.
+  - Run a lightweight dev proxy container (e.g. Caddy/Nginx) forwarding traffic to `host.docker.internal:3000` attached to `my_network` with Next.js Traefik labels so `https://shop.local/` routes directly to the dev server.
+- [ ] **WordPress Healthcheck Tuning**:
+  - Configure the WordPress container healthcheck to test `http://localhost:80/wp-includes/version.php` instead of `/` to avoid 15–20s timeouts on boot that cause Traefik to evict the backend.
 - [ ] **Configure Environment Variables**:
-  - Add `NEXT_PUBLIC_WORDPRESS_API_URL=https://your-store.com/graphql` to `.env.example` and `.env.development`.
-  - Add `NEXT_PUBLIC_WORDPRESS_URL=https://your-store.com` for checkout redirects.
+  - Add `NEXT_PUBLIC_WORDPRESS_API_URL=https://shop.local/graphql` to `.env.development` and `https://shop.meetjamali.com/graphql` to `.env.example`.
+  - Add `NEXT_PUBLIC_WORDPRESS_URL=https://shop.local` (dev) and `https://shop.meetjamali.com` (prod).
 - [ ] **Setup Universal Fetcher**:
   - Implement [woocommerce-fetcher.ts](./examples/woocommerce-fetcher.ts) supporting dual auth headers (`Authorization: Bearer` and `X-JWT-Auth`), ISR revalidation, and resilient response parsing (handling WordPress HTTP 403 status on valid data).
 
