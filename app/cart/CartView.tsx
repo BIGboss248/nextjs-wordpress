@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useCart } from '@/lib/woocommerce/cart-context';
-import { processCheckoutAction } from './actions';
+import { processCheckoutAction, getCheckoutUrlAction } from './actions';
 import { getAuthSessionAction } from '../login/actions';
 import { Link } from '../components/Link';
 
@@ -62,21 +62,33 @@ export function CartView() {
     });
   }, []);
 
+  const items = cart?.contents?.nodes || [];
+  const isEmpty = !isLoading && (cart?.isEmpty || items.length === 0);
+
   const handleProceedToCheckout = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setIsCheckingOut(true);
     setCheckoutError(null);
 
     try {
-      const res = await processCheckoutAction({
-        billing: billing.firstName || billing.email ? billing : undefined,
-        paymentMethod: 'WC_ZPal',
+      const cartItems = items
+        .map((node) => {
+          const dbId = node.product?.node?.databaseId;
+          return dbId ? { databaseId: dbId, quantity: node.quantity || 1 } : null;
+        })
+        .filter((item): item is { databaseId: number; quantity: number } => item !== null);
+
+      const res = await getCheckoutUrlAction(cartItems, {
+        email: authSession.email || billing.email,
+        firstName: authSession.name?.split(' ')[0] || billing.firstName,
+        lastName: authSession.name?.split(' ').slice(1).join(' ') || billing.lastName,
+        phone: billing.phone,
       });
 
-      if (res.success && res.redirectUrl) {
-        window.location.href = res.redirectUrl;
+      if (res?.url) {
+        window.location.href = res.url;
       } else {
-        setCheckoutError(res.error || 'Failed to prepare WooCommerce checkout.');
+        setCheckoutError('Could not generate WooCommerce checkout link.');
         setIsCheckingOut(false);
       }
     } catch (err) {
@@ -84,9 +96,6 @@ export function CartView() {
       setIsCheckingOut(false);
     }
   };
-
-  const items = cart?.contents?.nodes || [];
-  const isEmpty = !isLoading && (cart?.isEmpty || items.length === 0);
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -486,7 +495,7 @@ export function CartView() {
                 </div>
 
                 <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
-                  Creates an order from your Next.js cart session and redirects to WooCommerce native checkout to process payments and shipping securely.
+                  Transfers your cart items to WooCommerce checkout where you can enter your shipping address, see dynamic shipping calculations, and select payment options.
                 </p>
               </div>
             </div>

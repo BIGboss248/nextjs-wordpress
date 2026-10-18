@@ -57,13 +57,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [refreshCart]);
 
   React.useEffect(() => {
-    const primaryItem = cart?.contents?.nodes?.[0];
-    const primaryNode = primaryItem?.product?.node;
-    if (primaryNode?.databaseId) {
-      getCheckoutUrlAction({
-        databaseId: primaryNode.databaseId,
-        quantity: primaryItem?.quantity || 1,
-      }).then((res) => {
+    const rawNodes = cart?.contents?.nodes || [];
+    const cartItems = rawNodes
+      .map((node) => {
+        const dbId = node.product?.node?.databaseId;
+        return dbId ? { databaseId: dbId, quantity: node.quantity || 1 } : null;
+      })
+      .filter((item): item is { databaseId: number; quantity: number } => item !== null);
+
+    if (cartItems.length > 0) {
+      getCheckoutUrlAction(cartItems).then((res) => {
         if (res?.url) setCheckoutUrl(res.url);
       });
     } else {
