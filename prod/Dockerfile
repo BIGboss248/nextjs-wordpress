@@ -84,4 +84,3 @@ STOPSIGNAL SIGTERM
 
 # Start Next.js standalone server
 CMD ["node", "server.js"]
-

@@ -1,0 +1,93 @@
+services:
+  wordpress:
+    container_name: wordpress
+    hostname: wordpress
+    image: wordpress:latest
+    restart: unless-stopped
+    depends_on:
+      wordpress_db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST:-wordpress_db:3306}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME:-wordpress_db}
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER:-${WordPress_db_user}}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD:-${WordPress_Pass}}
+      WORDPRESS_TABLE_PREFIX: ${WORDPRESS_TABLE_PREFIX:-wp_}
+      WORDPRESS_DEBUG: ${WORDPRESS_DEBUG:-0}
+      WORDPRESS_CONFIG_EXTRA: ${WORDPRESS_CONFIG_EXTRA:-}
+      GRAPHQL_JWT_AUTH_SECRET_KEY: ${GRAPHQL_JWT_AUTH_SECRET_KEY:-}
+      WORDPRESS_AUTH_KEY: ${WORDPRESS_AUTH_KEY:-}
+      WORDPRESS_SECURE_AUTH_KEY: ${WORDPRESS_SECURE_AUTH_KEY:-}
+      WORDPRESS_LOGGED_IN_KEY: ${WORDPRESS_LOGGED_IN_KEY:-}
+      WORDPRESS_NONCE_KEY: ${WORDPRESS_NONCE_KEY:-}
+      WORDPRESS_AUTH_SALT: ${WORDPRESS_AUTH_SALT:-}
+      WORDPRESS_SECURE_AUTH_SALT: ${WORDPRESS_SECURE_AUTH_SALT:-}
+      WORDPRESS_LOGGED_IN_SALT: ${WORDPRESS_LOGGED_IN_SALT:-}
+      WORDPRESS_NONCE_SALT: ${WORDPRESS_NONCE_SALT:-}
+    volumes:
+      - ./WordPress:/var/www/html
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+    networks:
+      - my_network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:80/wp-includes/version.php"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=my_network"
+
+      # HTTP router (Redirects all HTTP traffic to HTTPS)
+      - "traefik.http.routers.wordpress-http.entrypoints=web"
+      - "traefik.http.routers.wordpress-http.rule=Host(`${DOMAIN_NAME:-shop.meetjamali.com}`) && (PathPrefix(`/checkout`) || PathPrefix(`/my-account`) || PathPrefix(`/wp-admin`) || PathPrefix(`/wp-login.php`) || PathPrefix(`/wp-content`) || PathPrefix(`/wp-includes`) || PathPrefix(`/wp-json`) || PathPrefix(`/graphql`))"
+      - "traefik.http.routers.wordpress-http.priority=100"
+      - "traefik.http.routers.wordpress-http.middlewares=wordpress-redirect@docker"
+      - "traefik.http.middlewares.wordpress-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.wordpress-redirect.redirectscheme.permanent=true"
+
+      # HTTPS router (Routes secure traffic: intercepts checkout, account, admin, media, REST & GraphQL on same domain)
+      - "traefik.http.routers.wordpress-secure.entrypoints=websecure"
+      - "traefik.http.routers.wordpress-secure.rule=Host(`${DOMAIN_NAME:-shop.meetjamali.com}`) && (PathPrefix(`/checkout`) || PathPrefix(`/my-account`) || PathPrefix(`/wp-admin`) || PathPrefix(`/wp-login.php`) || PathPrefix(`/wp-content`) || PathPrefix(`/wp-includes`) || PathPrefix(`/wp-json`) || PathPrefix(`/graphql`))"
+      - "traefik.http.routers.wordpress-secure.priority=100"
+      - "traefik.http.routers.wordpress-secure.tls=true"
+      - "traefik.http.routers.wordpress-secure.tls.certresolver=${CERT_RESOLVER:-myresolver}"
+      - "traefik.http.routers.wordpress-secure.service=wordpress-service"
+      - "traefik.http.routers.wordpress-secure.middlewares=wordpress-compress@docker"
+      - "traefik.http.middlewares.wordpress-compress.compress=true"
+
+      # Service load balancer port
+      - "traefik.http.services.wordpress-service.loadbalancer.server.port=80"
+
+  wordpress_db:
+    container_name: wordpress_db
+    hostname: wordpress_db
+    image: mysql:8.0
+    restart: unless-stopped
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_DATABASE: ${WORDPRESS_DB_NAME:-wordpress_db}
+      MYSQL_USER: ${WORDPRESS_DB_USER:-${WordPress_db_user}}
+      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD:-${WordPress_Pass}}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-${WORDPRESS_DB_PASSWORD:-${WordPress_Pass}}}
+    volumes:
+      - ./WordPress_database:/var/lib/mysql
+    networks:
+      - my_network
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD:-$${MYSQL_PASSWORD}} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    labels:
+      - "traefik.enable=false"
+
+networks:
+  my_network:
+    name: my_network
+    driver: bridge

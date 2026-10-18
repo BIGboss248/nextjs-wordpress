@@ -1,0 +1,4 @@
+.env
+WordPress/
+WordPress_database/
+backups/

@@ -1,0 +1,72 @@
+services:
+  # ============================================================================
+  # Next.js Storefront (Frontend App Router Standalone Container)
+  # ============================================================================
+  nextjs:
+    image: ${IMAGE_NAME:-ghcr.io/bigboss248/nextjs-wordpress}:${IMAGE_TAG:-latest}
+    container_name: ${CONTAINER_NAME:-nextjs-standalone-app}
+    hostname: ${HOSTNAME:-nextjs-app}
+    restart: always
+    stop_grace_period: 30s
+    build:
+      context: ..
+      dockerfile: prod/Dockerfile
+      args:
+        - PORT=${PORT:-3000}
+    environment:
+      - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
+      - PORT=${PORT:-3000}
+      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-https://${DOMAIN_NAME:-shop.meetjamali.com}}
+      - NEXT_PUBLIC_WORDPRESS_API_URL=${NEXT_PUBLIC_WORDPRESS_API_URL:-https://${DOMAIN_NAME:-shop.meetjamali.com}/graphql}
+      - NEXT_PUBLIC_WORDPRESS_URL=${NEXT_PUBLIC_WORDPRESS_URL:-https://${DOMAIN_NAME:-shop.meetjamali.com}}
+      - NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY:-}
+      - NEXT_PUBLIC_ENABLE_WEB_VITALS=${NEXT_PUBLIC_ENABLE_WEB_VITALS:-true}
+      - OTEL_SDK_DISABLED=${OTEL_SDK_DISABLED:-true}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "fetch(''http://127.0.0.1:'' + (process.env.PORT || 3000) + ''/api/health'').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"',
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - my_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=${DOCKER_NETWORK:-my_network}"
+
+      # Watchtower auto-update label (monitored by Tool-box Watchtower for automated CI/CD deployment)
+      - "com.centurylinklabs.watchtower.enable=true"
+
+      # Next.js HTTP Router (Redirects HTTP to HTTPS)
+      - "traefik.http.routers.nextjs-http.entrypoints=web"
+      - "traefik.http.routers.nextjs-http.rule=Host(`${DOMAIN_NAME:-shop.meetjamali.com}`)"
+      - "traefik.http.routers.nextjs-http.priority=10"
+      - "traefik.http.routers.nextjs-http.middlewares=nextjs-redirect@docker"
+      - "traefik.http.middlewares.nextjs-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.nextjs-redirect.redirectscheme.permanent=true"
+
+      # Next.js HTTPS Router (Catch-all router for storefront pages: /, /products, /cart, /login, /register, _next assets)
+      - "traefik.http.routers.nextjs-secure.entrypoints=websecure"
+      - "traefik.http.routers.nextjs-secure.rule=Host(`${DOMAIN_NAME:-shop.meetjamali.com}`)"
+      - "traefik.http.routers.nextjs-secure.priority=10"
+      - "traefik.http.routers.nextjs-secure.tls=true"
+      - "traefik.http.routers.nextjs-secure.tls.certresolver=${CERT_RESOLVER:-myresolver}"
+      - "traefik.http.routers.nextjs-secure.service=nextjs-service"
+      - "traefik.http.routers.nextjs-secure.middlewares=nextjs-compress@docker,nextjs-stream-headers@docker"
+
+      # Middlewares: Compression & Anti-buffering for React Server Component (RSC) streaming
+      - "traefik.http.middlewares.nextjs-compress.compress=true"
+      - "traefik.http.middlewares.nextjs-stream-headers.headers.customresponseheaders.X-Accel-Buffering=no"
+
+      # Service load balancer port
+      - "traefik.http.services.nextjs-service.loadbalancer.server.port=${PORT:-3000}"
+
+networks:
+  my_network:
+    name: ${DOCKER_NETWORK:-my_network}
+    driver: bridge

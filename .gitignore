@@ -38,4 +38,7 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
-
+# WordPress volumes and data
+prod/WordPress/WordPress/
+prod/WordPress/WordPress_database/
+prod/WordPress/backups/
