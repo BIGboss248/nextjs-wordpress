@@ -645,3 +645,16 @@ define( 'AUTOSAVE_INTERVAL', 86400 ); // Minimizes autosave file & DB writes
   docker exec -u 0 <container_name> docker-php-ext-install pdo_mysql
   docker exec <container_name> apache2ctl graceful
   ```
+
+
+---
+
+## 9. Iranian Payment Gateways & Sandbox vs. Live Mode Behavior
+
+Iranian payment gateways (both direct PSPs such as Bank Mellat / Beh Pardakht, Saman Kish, Sadad, Parsian, and aggregators/Pardakht-Yar such as ZarinPal, IDPay, Zibal, and Gateland) have strict domain and terminal verification requirements:
+
+1. **Dormant / Inactive Gateways (حالت راکد)**:
+   - Unless the gateway is activated with valid production terminal contracts and switched to **Live Mode**, transactions will be rejected with error codes (e.g. invalid merchant, unauthorized domain, or connection failed).
+2. **Local Development (shop.local) Strategy**:
+   - Local environments cannot negotiate live bank callbacks or terminal requests.
+   - For checkout integration verification in Next.js and WooCommerce, enable gateway **Sandbox Mode** (where available, e.g. ZarinPal with sandbox UUID) or utilize WooCommerce's native **Check Payments (پرداخت با چک)** or **Cash on Delivery (پرداخت در محل)**. This validates order creation, inventory deduction, customer association, and order-pay URL redirection safely without requiring live banking contracts.
