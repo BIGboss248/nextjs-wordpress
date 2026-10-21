@@ -84,3 +84,4 @@ down: check-docker
 	@docker compose -f docker-compose.yml down 2>/dev/null || sudo docker compose -f docker-compose.yml down
 	@docker compose -f WordPress/docker-compose.yml down 2>/dev/null || sudo docker compose -f WordPress/docker-compose.yml down
 	@echo -e "$(CLR_GREEN)[✔] Production stacks stopped.$(CLR_RESET)"
+

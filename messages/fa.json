@@ -112,6 +112,29 @@
     "updateQuantity": "تغییر تعداد",
     "unavailable": "غیرقابل سفارش",
     "sessionActive": "نشست ووکامرس فعال است"
+  },
+  "account": {
+    "title": "حساب کاربری مشتری",
+    "subtitle": "داشبورد حساب کاربری ووکامرس شما مبتنی بر Next.js و WPGraphQL.",
+    "activeSession": "نشست فعال",
+    "customerId": "شناسه مشتری ووکامرس: #{id}",
+    "viewCart": "مشاهده سبد خرید",
+    "shopMore": "ادامه خرید",
+    "signOut": "خروج از حساب",
+    "signingOut": "در حال خروج...",
+    "billingAddress": "آدرس صورت‌حساب",
+    "noBillingAddress": "هنوز آدرس صورت‌حسابی ثبت نشده است.",
+    "billingSyncNotice": "آدرس‌ها به صورت خودکار در اولین تسویه حساب همگام‌سازی می‌شوند.",
+    "recentOrders": "سفارش‌های اخیر ({count})",
+    "noOrders": "هیچ سفارشی در تاریخچه حساب شما یافت نشد.",
+    "noOrdersNotice": "سفارش‌های تکمیل شده شما به صورت خودکار در اینجا نمایش داده می‌شوند.",
+    "orderNumber": "سفارش شماره {number}",
+    "phone": "تلفن: {phone}",
+    "email": "ایمیل: {email}",
+    "browseCatalog": "مشاهده کاتالوگ فروشگاه",
+    "home": "خانه",
+    "storeCatalog": "کاتالوگ فروشگاه",
+    "dashboard": "داشبورد مشتری"
   }
 }
 

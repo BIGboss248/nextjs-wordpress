@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 import { execSync } from "node:child_process";
 import packageJson from "./package.json";
+
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 // In local development behind Traefik self-signed certificates, allow Node.js fetch() to connect
 if (process.env.NODE_ENV === "development") {
@@ -58,5 +61,5 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);
 

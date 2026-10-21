@@ -112,6 +112,29 @@
     "updateQuantity": "Update quantity",
     "unavailable": "Unavailable",
     "sessionActive": "WooCommerce Session Active"
+  },
+  "account": {
+    "title": "Customer Account",
+    "subtitle": "Your headless WooCommerce account dashboard powered by Next.js and WPGraphQL.",
+    "activeSession": "Active Session",
+    "customerId": "WooCommerce Customer ID: #{id}",
+    "viewCart": "View Cart",
+    "shopMore": "Shop More",
+    "signOut": "Log Out",
+    "signingOut": "Signing Out...",
+    "billingAddress": "Billing Address",
+    "noBillingAddress": "No billing address recorded yet.",
+    "billingSyncNotice": "Addresses are automatically synchronized on your first checkout.",
+    "recentOrders": "Recent Orders ({count})",
+    "noOrders": "No orders found in your account history.",
+    "noOrdersNotice": "Your completed orders will appear here automatically.",
+    "orderNumber": "Order #{number}",
+    "phone": "Phone: {phone}",
+    "email": "Email: {email}",
+    "browseCatalog": "Browse Store Catalog",
+    "home": "Home",
+    "storeCatalog": "Store Catalog",
+    "dashboard": "Customer Dashboard"
   }
 }
 

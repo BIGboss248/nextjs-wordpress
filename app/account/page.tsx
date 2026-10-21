@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -5,7 +6,7 @@ import { Link } from '../components/Link';
 import { fetchWooCommerce } from '@/lib/woocommerce/client';
 import { GET_USER_PROFILE_QUERY } from '@/lib/woocommerce/queries';
 import { UserProfileQueryResult, WordPressUser } from '@/lib/woocommerce/types';
-import { UserProfileView } from '../login/UserProfileView';
+import { CustomerDashboard, CustomerDashboardSkeleton } from '../components/account/CustomerDashboard';
 
 export const metadata: Metadata = {
   title: 'My Account | Customer Dashboard',
@@ -88,7 +89,9 @@ export default async function AccountPage() {
         </div>
 
         {/* Customer Profile & Orders View */}
-        <UserProfileView user={user} customer={customer} />
+        <Suspense fallback={<CustomerDashboardSkeleton />}>
+          <CustomerDashboard user={user} customer={customer} />
+        </Suspense>
       </div>
     </main>
   );

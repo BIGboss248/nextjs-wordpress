@@ -33,10 +33,9 @@ flowchart LR
   - Traefik intercepts `/my-account` (priority 100) and serves native WooCommerce customer login/register form.
   - Authenticated visitors with `wordpress_logged_in_*` cookies bypass the login form and redirect straight to the destination.
 - [x] **2.2. Implement Customer Dashboard (`app/account/page.tsx`)**
-  - Created `app/account/page.tsx` as a React Server Component.
-  - Forwards browser cookies (`wordpress_logged_in_*`, `auth_token`) to `https://shop.local/graphql`.
-  - Queries `GET_USER_PROFILE_QUERY` to retrieve customer profile, billing address, and orders.
-  - Redirects unauthenticated sessions to `/login?redirect_to=/account`.
+  - Built production component [`CustomerDashboard`](app/components/account/CustomerDashboard/) following `/nextjs-component-dev` standards with dual-language `next-intl` dictionaries (`en` / `fa`), strict Tailwind logical properties, and exact-geometry `CustomerDashboardSkeleton`.
+  - Created targeted Jest + RTL unit test suite (`CustomerDashboard.test.tsx`) covering user profile rendering, billing details, order history states, and logout action.
+  - Server Component in `app/account/page.tsx` forwards browser cookies to `https://shop.local/graphql`, queries `GET_USER_PROFILE_QUERY`, and streams the view inside `<Suspense fallback={<CustomerDashboardSkeleton />}>`.
   - Fixed WordPress mu-plugin (`headless-redirects.php`) to intercept `/my-account/` via `template_redirect` and safely redirect logged-in visitors to `/account`.
 - [x] **2.3. Update Navbar / Header Auth Indicator**
   - Updated `app/page.tsx` to read `wordpress_logged_in_*` and `auth_token` cookies.
