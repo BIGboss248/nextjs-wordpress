@@ -69,6 +69,7 @@ flowchart TD
 2. **Missing Session Header**: Cart items will vanish on the next request if the `woocommerce-session` token returned by the server is not stored and resent by the frontend client.
 3. **Admin React Incompatibility**: Avoid plugins with legacy Gutenberg admin bundles (like `wp-graphql-headless-login` settings panels) if using strict core WordPress without custom build steps; stick to constant-driven plugins like `wp-graphql-jwt-authentication`.
 4. **CORS Headers**: Ensure WordPress allows requests from your frontend origin by configuring headers or reverse proxy.
+5. **Docker on Windows Filesystem Slowness (15s–45s Page Loads)**: Mounting the entire WordPress root directory and MySQL database directly from Windows NTFS (`C:\`, `D:\`) creates massive 9P/virtiofs filesystem translation overhead on thousands of PHP stat/include calls. Use Docker named volumes for WordPress core (`wp_core:/var/www/html`) and MySQL (`db_data:/var/lib/mysql`) while only bind mounting `wp-content`, or run the stack inside the native WSL2 Linux filesystem (`/home/<user>/...`), and define `DISABLE_WP_CRON = true` for local development.
 
 ---
 

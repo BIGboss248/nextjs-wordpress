@@ -310,6 +310,12 @@
     "Category": "PROCESS",
     "Instruction": "Never execute 'git commit' or 'git push' unless the user explicitly asks to commit or push in their prompt; only stage modified files (e.g. 'git add') after applying changes.",
     "Why": "user explicit correction: from now on only commit changes when i say so"
+  },
+  {
+    "Rule_number": 53,
+    "Category": "ARCH",
+    "Instruction": "When developing or configuring WordPress with Docker Compose on Windows host environments, the primary root cause of severe slowness (15s–45s page loads) is that Docker volumes were bind-mounted from the Windows host NTFS filesystem ('C:\\', 'D:\\'). In Windows, Docker volumes MUST be Docker named volumes ('wp_core:/var/www/html' and 'wp_db_data:/var/lib/mysql') so that core WordPress files and the MySQL database reside natively inside the Linux ext4 filesystem environment (or the project must run inside the native WSL2 filesystem '/home/<user>/...'). Previous attempts to fix slowness by tweaking database settings, OPcache sizing, or container timeouts are invalid workarounds that do not solve the root I/O translation bottleneck. Only bind-mount active development folders (such as 'wp-content/mu-plugins') while keeping the core engine in named volumes.",
+    "Why": "user explicit finding and Docker community consensus: cross-OS 9P filesystem translation between Windows NTFS and Docker Linux VM is the true cause of slowness; previous database and container settings tweaks were invalid"
   }
 ]
 
