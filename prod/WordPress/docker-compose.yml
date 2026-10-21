@@ -25,12 +25,13 @@ services:
       WORDPRESS_LOGGED_IN_SALT: ${WORDPRESS_LOGGED_IN_SALT:-}
       WORDPRESS_NONCE_SALT: ${WORDPRESS_NONCE_SALT:-}
     volumes:
-      - ./WordPress:/var/www/html
-      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+      - WordPress:/var/www/html
+      - WP_uploads:/usr/local/etc/php/conf.d/uploads.ini:ro
     networks:
       - my_network
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:80/wp-includes/version.php"]
+      test:
+        ["CMD", "curl", "--fail", "http://localhost:80/wp-includes/version.php"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -75,11 +76,15 @@ services:
       MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD:-${WordPress_Pass}}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-${WORDPRESS_DB_PASSWORD:-${WordPress_Pass}}}
     volumes:
-      - ./WordPress_database:/var/lib/mysql
+      - WordPress_database:/var/lib/mysql
     networks:
       - my_network
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD:-$${MYSQL_PASSWORD}} || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD:-$${MYSQL_PASSWORD}} || exit 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -91,3 +96,10 @@ networks:
   my_network:
     name: my_network
     driver: bridge
+volumes:
+  WordPress:
+    name: WordPress
+  WP_uploads:
+    name: WP_uploads
+  WordPress_database:
+    name: WordPress_database

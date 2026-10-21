@@ -257,3 +257,17 @@ define( 'WP_POST_REVISIONS', false );
 // Increase autosave interval to reduce disk writes
 define( 'AUTOSAVE_INTERVAL', 86400 );
 ```
+
+
+#### Strategy D: Automated Makefile Patching of PHP `pdo_mysql` Driver for Laravel & Regional Plugins
+- **Problem**: Plugins using Laravel Capsule or Eloquent (`Illuminate\Database`), such as **Persian WooCommerce (`persian-woocommerce`)** and Gateland, connect to MySQL via PHP PDO (`pdo_mysql`). Official `wordpress:latest` Docker images only bundle `mysqli` and `mysqlnd`.
+- **Symptom**: Unhandled `Illuminate\Database\QueryException: could not find driver` crashing `/wp-admin` with HTTP 500 fatal errors.
+- **Recommended Solution (No Custom Docker Image)**: Deploy standard `wordpress:latest` containers and execute the automated Makefile patch target to install `pdo_mysql` inside the running container:
+  ```bash
+  make patch-pdo-mysql
+  ```
+  Or CLI command:
+  ```bash
+  docker exec -u 0 <container_name> docker-php-ext-install pdo_mysql
+  docker exec <container_name> apache2ctl graceful
+  ```

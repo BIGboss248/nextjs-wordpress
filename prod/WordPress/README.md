@@ -12,6 +12,10 @@ Production-ready Docker Compose deployment for WordPress and MySQL 8.0, preconfi
   - Response compression (`gzip`/`brotli`/`zstd`) enabled for static assets and HTML.
   - Connected to the shared bridge network `my_network`.
 - **Stand-alone (No Redis)**: Clean WordPress + MySQL deployment without Redis overhead.
+- **PHP Extensions & Database Drivers (`pdo_mysql`)**:
+  - Uses the official, unmodified `wordpress:latest` image.
+  - Automatically patched on deployment with `pdo_mysql` via Makefile target (`make patch-pdo-mysql` or `make deploy-all`).
+  - Fixes fatal crashes (`Illuminate\Database\QueryException: could not find driver` / HTTP 500) triggered by plugins that use Laravel Capsule / Eloquent or PDO (e.g., Persian WooCommerce / `persian-woocommerce`).
 - **PHP Performance & Upload Tuning**:
   - Custom [uploads.ini](file:///d:/Scripts/Tool-box/WordPress/uploads.ini) mounted to `/usr/local/etc/php/conf.d/uploads.ini` (64 MB upload limit, 256 MB memory limit, 300 s execution timeout).
 - **Core Optimizations via `WORDPRESS_CONFIG_EXTRA`**:
@@ -130,4 +134,34 @@ make install-wordpress
 
 5. **Browse to your domain**:
    Navigate to `https://your-domain.com` to complete the initial WordPress installation wizard.
+
+---
+
+## Troubleshooting & Known Issues
+
+### Persian WooCommerce or Laravel Plugins Crash with HTTP 500 (`could not find driver`)
+
+- **Symptom**: After installing or activating plugins such as **Persian WooCommerce (`persian-woocommerce`)** or other extensions using Laravel Capsule (`Illuminate\Database`), `/wp-admin/` or storefront requests return HTTP 500.
+- **Error in Docker Logs**:
+  ```text
+  Fatal error: Uncaught Illuminate\Database\QueryException: could not find driver
+  (SQL: select * from information_schema.tables where table_schema = wordpress_db ...)
+  in .../persian-woocommerce/vendor/illuminate/database/Connection.php
+  ```
+- **Cause**: The official `wordpress:latest` Docker image only bundles `mysqli` and `mysqlnd`. It does **not** bundle `pdo_mysql`. Plugins using Eloquent or PDO require `pdo_mysql`.
+- **Recommended Solution (No Custom Docker Image Needed)**:
+  Run the automated Makefile patch target against the standard WordPress container:
+  ```bash
+  make patch-pdo-mysql
+  ```
+  Or from the `prod/` folder when orchestrating production stacks:
+  ```bash
+  make patch-wordpress
+  ```
+- **Manual CLI Command**:
+  ```bash
+  docker exec -u 0 wordpress docker-php-ext-install pdo_mysql
+  docker exec wordpress apache2ctl graceful
+  ```
+
 

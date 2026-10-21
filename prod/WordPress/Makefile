@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 
-.PHONY: help init-env setup-all setup-network setup-dirs setup-domain setup-resolver setup-db-user setup-db-passwords setup-salts setup-jwt-secret report reload-if-running restart up down logs status backup-db check-docker install-wordpress
+.PHONY: help init-env setup-all setup-network setup-dirs setup-domain setup-resolver setup-db-user setup-db-passwords setup-salts setup-jwt-secret report reload-if-running restart up down logs status backup-db check-docker install-wordpress patch-pdo-mysql
 
 # Color definitions
 CLR_RESET   = \033[0m
@@ -31,6 +31,7 @@ help:
 	@echo -e "  $(CLR_GREEN)make restart$(CLR_RESET)            - Recreate and restart WordPress containers"
 	@echo -e "  $(CLR_GREEN)make logs$(CLR_RESET)               - Follow real-time container logs"
 	@echo -e "  $(CLR_GREEN)make status$(CLR_RESET)             - Check container status via Docker Compose"
+	@echo -e "  $(CLR_GREEN)make patch-pdo-mysql$(CLR_RESET)     - Install pdo_mysql inside container for Persian WooCommerce / Laravel"
 	@echo -e "  $(CLR_GREEN)make backup-db$(CLR_RESET)          - Create a timestamped SQL backup of the MySQL database"
 
 # Ensure .env exists from template
@@ -343,4 +344,21 @@ install-wordpress: check-docker setup-all
 		sudo docker compose up -d; \
 		echo -e "$(CLR_GREEN)[✔] WordPress deployed successfully.$(CLR_RESET)"; \
 	fi
+	@$(MAKE) --no-print-directory patch-pdo-mysql
+
+# Patch WordPress container with missing pdo_mysql extension (required by Persian WooCommerce & Laravel Capsule)
+patch-pdo-mysql: check-docker
+	@echo -e "$(CLR_YELLOW)[*] Checking/Installing pdo_mysql extension inside WordPress container...$(CLR_RESET)"
+	@if sudo docker compose exec -T wordpress php -m 2>/dev/null | grep -q '^pdo_mysql$$'; then \
+		echo -e "$(CLR_GREEN)[✔] pdo_mysql is already installed in WordPress container.$(CLR_RESET)"; \
+	else \
+		echo -e "$(CLR_YELLOW)[*] Compiling and installing pdo_mysql inside container...$(CLR_RESET)"; \
+		if sudo docker compose exec -u 0 -T wordpress docker-php-ext-install pdo_mysql; then \
+			sudo docker compose exec -T wordpress apache2ctl graceful; \
+			echo -e "$(CLR_GREEN)[✔] pdo_mysql successfully installed and Apache reloaded.$(CLR_RESET)"; \
+		else \
+			echo -e "$(CLR_RED)[!] Failed to install pdo_mysql. Ensure WordPress container is running.$(CLR_RESET)"; \
+		fi; \
+	fi
+
 

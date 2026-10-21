@@ -316,6 +316,12 @@
     "Category": "ARCH",
     "Instruction": "When developing or configuring WordPress with Docker Compose on Windows host environments, the primary root cause of severe slowness (15s–45s page loads) is that Docker volumes were bind-mounted from the Windows host NTFS filesystem ('C:\\', 'D:\\'). In Windows, Docker volumes MUST be Docker named volumes ('wp_core:/var/www/html' and 'wp_db_data:/var/lib/mysql') so that core WordPress files and the MySQL database reside natively inside the Linux ext4 filesystem environment (or the project must run inside the native WSL2 filesystem '/home/<user>/...'). Previous attempts to fix slowness by tweaking database settings, OPcache sizing, or container timeouts are invalid workarounds that do not solve the root I/O translation bottleneck. Only bind-mount active development folders (such as 'wp-content/mu-plugins') while keeping the core engine in named volumes.",
     "Why": "user explicit finding and Docker community consensus: cross-OS 9P filesystem translation between Windows NTFS and Docker Linux VM is the true cause of slowness; previous database and container settings tweaks were invalid"
+  },
+  {
+    "Rule_number": 54,
+    "Category": "ARCH",
+    "Instruction": "In WordPress Docker deployments (both standalone and WooCommerce), the official 'wordpress:latest' base image only bundles 'mysqli' and 'mysqlnd' and lacks PHP's 'pdo_mysql' extension. Plugins utilizing Laravel Capsule or Eloquent ('Illuminate\\Database'), such as Persian WooCommerce ('persian-woocommerce') and Gateland, fail on 'admin_init' with 'Fatal error: Uncaught Illuminate\\Database\\QueryException: could not find driver' and cause WordPress to return HTTP 500 errors. Do NOT create custom Docker images just to install this extension; keep standard WordPress containers and patch them via Makefile deployment targets (e.g. 'make patch-pdo-mysql' or 'make patch-wordpress' running 'docker exec -u 0 <container> docker-php-ext-install pdo_mysql && docker exec <container> apache2ctl graceful') after the container is pulled and started.",
+    "Why": "user explicit instruction: do not create custom image just to run docker-php-ext-install; deploy standard wordpress containers and include makefile targets to patch the container after deployment"
   }
 ]
 

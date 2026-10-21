@@ -55,6 +55,8 @@ Before writing or altering any code, the agent **MUST** grill the user to determ
   - Configure the WordPress container healthcheck to test `http://localhost:80/wp-includes/version.php` instead of `/` to avoid 15–20s timeouts on boot that cause Traefik to evict the backend.
 - [ ] **Windows Docker I/O Performance Tuning (Named Volumes & WSL2)**:
   - If developing on Windows hosts, do NOT bind-mount the full WordPress core or MySQL directory directly from NTFS (`C:\`, `D:\`). Use Docker named volumes (`wp_core`, `wp_db_data`) while mounting only `wp-content`, or run the repository inside the WSL2 native filesystem (`/home/<user>/...`) to prevent 15s–45s page loads. In local development, add `define('DISABLE_WP_CRON', true);` and `define('WP_POST_REVISIONS', false);`.
+- [ ] **WordPress PHP PDO Driver (`pdo_mysql`)**:
+  - Deploy standard `wordpress:latest` containers without creating custom Docker images, and patch them after deployment via the Makefile target (`make patch-pdo-mysql` or `make patch-wordpress`). Standard `wordpress:latest` images lack `pdo_mysql`, causing plugins utilizing Laravel Capsule / Eloquent (such as Persian WooCommerce `persian-woocommerce` and Gateland) to throw unhandled `Illuminate\Database\QueryException: could not find driver` and crash the admin dashboard with HTTP 500 errors.
 - [ ] **Configure Environment Variables**:
   - Add `NEXT_PUBLIC_WORDPRESS_API_URL=https://shop.local/graphql` to `.env.development` and `https://shop.meetjamali.com/graphql` to `.env.example`.
   - Add `NEXT_PUBLIC_WORDPRESS_URL=https://shop.local` (dev) and `https://shop.meetjamali.com` (prod).
