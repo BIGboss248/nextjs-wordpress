@@ -152,6 +152,9 @@ export interface CartItemNode {
   product?: {
     node: CartItemProduct;
   } | null;
+  variation?: {
+    node: ProductVariationNode;
+  } | null;
 }
 
 export interface CartData {

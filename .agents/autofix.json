@@ -2,8 +2,8 @@
   {
     "Rule_number": 1,
     "Category": "PROCESS",
-    "Instruction": "Always sync updated Next.js skills and any specifically modified skill in '.agents/skills/' directly to 'd:/Scripts/Obsidian/skills/' without blind bulk copying of all skills - ensure customized/updated skills are centrally mirrored in the Obsidian vault.",
-    "Why": "user preference: keep Next.js and modified skills synced to Obsidian knowledge base"
+    "Instruction": "Always sync updated Next.js skills and any specifically modified skill in '.agents/skills/' directly to 'd:/Scripts/Obsidian/skills/' without blind bulk copying of all skills, and automatically stage, commit, and push those synced changes inside the Obsidian repository ('d:/Scripts/Obsidian') only - ensure customized/updated skills are centrally mirrored and versioned in the Obsidian repository while keeping the current project workspace uncommitted until explicitly requested.",
+    "Why": "user explicit instruction: sync updated skills to Obsidian and commit and push the synced changes in the Obsidian repository only"
   },
   {
     "Rule_number": 2,
@@ -32,299 +32,151 @@
   {
     "Rule_number": 6,
     "Category": "ARCH",
-    "Instruction": "Do not configure or generate Docker development environments (no Dockerfile.dev or dev compose watch service) - configure Docker strictly for standalone production builds (Dockerfile, docker-compose.yml for production standalone, .dockerignore, and next.config standalone output).",
-    "Why": "user explicit preference: user runs dev server locally without docker and only wants Docker for production containerization"
+    "Instruction": "Configure Docker strictly for standalone production builds ('Dockerfile', 'docker-compose.yml' for production standalone, '.dockerignore', and 'next.config.ts' standalone output) — never generate 'Dockerfile.dev' or dev compose watch services, and always name the Compose file 'docker-compose.yml' (never 'compose.yaml').",
+    "Why": "user explicit preference: run dev server locally without Docker, use Docker strictly for production, and follow standard docker-compose.yml naming"
   },
   {
     "Rule_number": 7,
     "Category": "ARCH",
-    "Instruction": "In Docker containerization setup, always name the Docker Compose configuration file 'docker-compose.yml' (not 'compose.yaml').",
-    "Why": "user explicit preference: standard docker-compose.yml naming convention"
+    "Instruction": "In GitHub Actions CI/CD, Release Please, and GHCR container workflows: build multi-architecture images (AMD64 & ARM64) natively on separate dedicated runner machines without QEMU emulation ('docker/setup-qemu-action'); set concurrency 'cancel-in-progress: false' so ongoing runs and release builds are never cancelled; and always lowercase the repository name into 'IMAGE_NAME' ('tr [:upper:] [:lower:]') to satisfy Docker OCI naming rules.",
+    "Why": "user explicit preferences and OCI lowercase repository name requirement"
   },
   {
     "Rule_number": 8,
     "Category": "ARCH",
-    "Instruction": "In multi-architecture Docker container workflows (AMD64 & ARM64), build natively on separate dedicated runner machines in matrix jobs without using QEMU emulation (docker/setup-qemu-action).",
-    "Why": "user explicit preference: build multi-arch container images natively across separate machines without QEMU emulation"
-  },
-  {
-    "Rule_number": 9,
-    "Category": "ARCH",
-    "Instruction": "In GitHub Actions CI/CD and Release Please workflows, configure concurrency 'cancel-in-progress: false' to ensure ongoing workflow runs and release builds on main are never cancelled when new commits are pushed.",
-    "Why": "user explicit preference: prevent workflow runs and release builds from being cancelled by subsequent commits"
-  },
-  {
-    "Rule_number": 10,
-    "Category": "ARCH",
-    "Instruction": "In GitHub Actions container build workflows (GHCR/Docker), always lowercase the repository name (e.g. using 'tr [:upper:] [:lower:]' into an IMAGE_NAME environment variable) because Docker OCI naming specifications strictly forbid uppercase characters.",
-    "Why": "fix failure: Docker buildx failed with 'repository name must be lowercase' when repository owner/name contains uppercase characters"
-  },
-  {
-    "Rule_number": 11,
-    "Category": "ARCH",
-    "Instruction": "Create custom React UI components (including JSX wrappers like Link) in separate .tsx files under the components directory (e.g. 'app/components/Link.tsx') and keep navigation helper configuration files like 'i18n/navigation.ts' pure TypeScript without JSX.",
+    "Instruction": "Create custom React UI components (including JSX wrappers like Link) in separate '.tsx' files under the components directory (e.g. 'app/components/Link.tsx') and keep navigation helper configuration files like 'i18n/navigation.ts' pure TypeScript without JSX.",
     "Why": "user explicit correction: create the Link component in a separate file in @components"
   },
   {
-    "Rule_number": 12,
+    "Rule_number": 9,
     "Category": "PROCESS",
     "Instruction": "Never chain multiple commands using '&&', '||', or ';' on a single line; execute terminal commands individually as discrete single operations. When running inspection commands like 'git diff' or 'git status', avoid appending unnecessary specific path arguments unless specifically required so commands match user-configured custom permissions and allowlists.",
     "Why": "user requirement: compound one-liner commands and granular arguments break Antigravity custom permissions and command allowlists"
   },
   {
-    "Rule_number": 13,
+    "Rule_number": 10,
     "Category": "ARCH",
-    "Instruction": "Antigravity (AG) only discovers and loads MCP servers that are configured globally on the host system (e.g. '~/.gemini/antigravity/mcp_config.json' and '~/.gemini/config/mcp_config.json'). When setting up or updating MCP servers (such as 'next-devtools' or 'playwright'), always configure them for BOTH the workspace (e.g. 'mcp.json', '.vscode/mcp.json', or '.agents/plugins/workspace-tools/mcp_config.json') AND globally for AG on the host system.",
-    "Why": "user explicit correction: AG only recognizes MCP servers configured globally on the host system, so both workspace and global AG configurations must always be configured"
+    "Instruction": "When configuring or updating MCP servers (including via 'ag-customizer'): register them at the workspace level ('mcp.json', '.vscode/mcp.json', and '<workspace>/opencode.json' under '\"mcp\": { \"servers\": { ... } }') AND globally on the host system strictly for Google Antigravity / AGY only ('~/.gemini/antigravity/mcp_config.json' and '~/.gemini/config/mcp_config.json') — never globally for other coding agents (Claude Desktop, Cursor, VS Code, Cline, or global OpenCode). To disable an MCP server in global AGY configs, move it completely out of 'mcpServers' into '_disabledMcpServers' because 'agy.exe' ignores '\"disabled\": true'.",
+    "Why": "user explicit requirements for AGY global discovery, workspace-local OpenCode MCP config, and agy.exe disabled server behavior"
   },
   {
-    "Rule_number": 14,
-    "Category": "ARCH",
-    "Instruction": "When setting up MCP servers globally on the host system, configure them strictly for Google Antigravity / AGY only ('~/.gemini/antigravity/mcp_config.json' and '~/.gemini/config/mcp_config.json'). Do NOT configure or register MCP servers globally for other coding agents (e.g., Claude Desktop, Cursor, VS Code, Cline).",
-    "Why": "user explicit requirement: setup MCP servers globally for AGY only, not for other coding agents"
-  },
-  {
-    "Rule_number": 15,
+    "Rule_number": 11,
     "Category": "PROCESS",
     "Instruction": "When executing cross-directory file synchronization, copy operations, or filesystem tasks on Windows, invoke PowerShell ('powershell -Command ...') instead of writing and running ad-hoc Python scratch scripts.",
     "Why": "user explicit correction and preference: use powershell for file operations"
   },
   {
-    "Rule_number": 16,
+    "Rule_number": 12,
     "Category": "ARCH",
-    "Instruction": "In Storybook stories created for components, write comprehensive structured markdown documentation in 'parameters.docs.description.component' and export strictly four story variants: 'Light' (configured with light theme and dedicated light background container), 'Dark' (configured with dark theme and dedicated dark background container), 'SkeletonLight' (skeleton fallback configured with light theme and dedicated light background container), and 'SkeletonDark' (skeleton fallback configured with dark theme and dedicated dark background container) so both light and dark variants of the component and its skeleton are immediately visible side-by-side with proper contrast on Storybook Docs pages. All Storybook preview wrappers, backgrounds, and story decorators MUST strictly use the production semantic theme tokens from 'app/globals.css' ('bg-background', 'text-foreground', 'border-border', 'text-muted-foreground', etc.) with scoped '.light' and '.dark' classes; hardcoding custom arbitrary styles or hex/palette colors (such as '#FAFAFA', '#050505', 'border-zinc-*') in Storybook is strictly prohibited.",
-    "Why": "user explicit requirement: use production theme tokens for component creation and Storybook backgrounds without hardcoding custom styles, write docs for storybook, and display both light and dark variants of the component and skeleton with high contrast on Docs pages"
+    "Instruction": "Only create Storybook story files ('[ComponentName].stories.tsx') and run Storybook verification tests ('pnpm run storybook:smoke' and 'pnpm run build-storybook') when the 'nextjs-storybook-story' skill is specifically invoked or explicitly requested by the user. When authored, stories must include structured markdown docs in 'parameters.docs.description.component', export strictly four variants ('Light', 'Dark', 'SkeletonLight', 'SkeletonDark') styled exclusively with production semantic tokens from 'app/globals.css' ('.light' / '.dark' scopes, zero hardcoded hex/palette classes), and wrap stories in 'NextIntlClientProvider' and 'ProgressBarProvider'.",
+    "Why": "user explicit requirements for on-demand Storybook creation, 4 theme/skeleton variants with semantic tokens, next-intl context wrapping, and smoke/build verification"
+  },
+  {
+    "Rule_number": 13,
+    "Category": "PROCESS",
+    "Instruction": "Always invoke and apply '.agents/skills/codebase-memory' before searching code, inspecting Next.js distribution docs ('node_modules/next/dist/docs'), or assessing change impact. Maintain a root '.cbmignore' file excluding high-churn directories ('.agents/', 'docs/', build caches, test reports, '.codebase-memory/') with 'auto_watch = false' to prevent system stutters, verify graph freshness via 'index_status' or 'index_repository(mode=\"fast\")' before querying, and prioritize graph tools ('search_graph', 'trace_path', 'get_code_snippet', 'search_code', 'detect_changes') over naive grep or full-file reads.",
+    "Why": "user explicit requirements: use codebase-memory MCP for code and Next.js docs search, keep auto_watch disabled with .cbmignore, and index on demand first"
+  },
+  {
+    "Rule_number": 14,
+    "Category": "UI",
+    "Instruction": "In navigation components (SiteNavbar, MobileNavDrawer) and footer components (SiteFooter, SinglePageFooter), design specifications, and translations, do not render 'COCKPIT TOPOLOGY', uptime badges ('99.9%'), version tags, systems observatory badges ('// SYSTEMS OBSERVATORY'), navigation section headings ('// QUICK NAVIGATION'), or telemetry status badges ('SYSTEM_STATUS: OPERATIONAL'); keep brand lockups, navigation links, and layouts clean.",
+    "Why": "user explicit instructions: remove extraneous telemetry, observatory, and status badges from navigation and footer components"
+  },
+  {
+    "Rule_number": 15,
+    "Category": "PROCESS",
+    "Instruction": "NEVER use 'read_url_content' to download binary files (images, raw HTML exports, or any non-text binary). Always use 'run_command' with PowerShell 'Invoke-WebRequest -Uri <url> -OutFile <path>' to download binary or raw files directly to disk.",
+    "Why": "diagnosed mistake: read_url_content is a text-only fetcher that corrupts binary data"
+  },
+  {
+    "Rule_number": 16,
+    "Category": "PROCESS",
+    "Instruction": "In design skills and workflows, do not call 'generate_image' or generate images directly to produce image assets. Instead, output the structured image prompt (description, aspect ratio, suggested filename, and target directory) directly to the user so the user can generate the image externally and place it in the project files, reducing token consumption.",
+    "Why": "user explicit requirement: output image prompts to user instead of calling generate_image to conserve tokens"
   },
   {
     "Rule_number": 17,
     "Category": "PROCESS",
-    "Instruction": "When the 'nextjs-storybook-story' workflow is invoked or when Storybook stories are created/tested, the verification gate MUST physically execute Storybook verification tests (both smoke/indexing test via 'pnpm run storybook:smoke' or 'storybook dev --smoke-test' and static production build via 'pnpm run build-storybook') to ensure zero syntax errors, AST parsing breaks, or bundle failures before declaring completion.",
-    "Why": "user explicit requirement: add the story book test to verification gate of nextjs-storybook-story"
+    "Instruction": "Always read, activate, and strictly follow '.agents/skills/nextjs-component-dev/SKILL.md' when creating any React/Next.js component and '.agents/skills/nextjs-page-dev/SKILL.md' when creating any Next.js page ('page.tsx'): verify/start the dev server via 'next-devtools' MCP ('nextjs_index' / 'nextjs_call'), extract all user-facing copy into 'messages/[locale].json' across all supported locales (zero hardcoded text or fallback objects), export 'generateStaticParams()' for routes under '[locale]' when multiple locales exist, run targeted component unit/edge tests rather than the full suite, and check off completed items ('- [x]') in 'docs/plan/05-pages-and-components.md'.",
+    "Why": "user explicit requirements for mandatory component/page skill workflows, i18n dictionary population, targeted testing, next-devtools checks, and plan checklist synchronization"
   },
   {
     "Rule_number": 18,
     "Category": "PROCESS",
-    "Instruction": "When using the 'codebase-memory-mcp' code intelligence server, always maintain a root '.cbmignore' file excluding high-churn files ('.agents/', 'docs/', build caches, test reports, and '.codebase-memory/') and configure 'auto_watch = false' (via 'codebase-memory-mcp config set auto_watch false') to prevent system stutters and constant background re-indexing during file editing.",
-    "Why": "diagnosed performance issue: codebase-memory background git watcher triggers reindexing and zstd artifact rewrites on every save, causing system stutters"
+    "Instruction": "In the 'component-design' skill and UI discovery workflows, conduct the user interview in progressive adaptive rounds (Round 1: Purpose, Intent & Emotional Tone; Round 2: Spatial Hierarchy, Layout Grid & Focal Flow; Round 3: Interaction Dynamics, Media Accents & Ergonomics) so each subsequent round uses the user's previous answers as context to formulate targeted follow-up questions.",
+    "Why": "user explicit instruction: conduct component-design interview in adaptive rounds"
   },
   {
     "Rule_number": 19,
     "Category": "PROCESS",
-    "Instruction": "Always invoke and apply '.agents/skills/codebase-memory' before searching, exploring, reading code, or assessing change impact. Because background watcher re-indexing is disabled ('auto_watch = false') to prevent system stutters, the agent MUST always ensure graph freshness by checking 'index_status' or executing 'index_repository' (with mode='fast' or 'moderate') before issuing search queries, and always prioritize codebase-memory graph tools ('search_graph', 'trace_path', 'get_code_snippet', 'detect_changes') over naive text grep or full-file reading.",
-    "Why": "user explicit requirement: create a skill that the agent always invokes and configures agent to use codebase memory mcp to search the codebase and always indexes codebase first since on-watch indexing is disabled"
+    "Instruction": "When creating or authoring AI skills ('SKILL.md'), strictly minimize the YAML frontmatter 'description' to 1-2 concise sentences stating WHAT the skill does and specific trigger phrases, keep 'SKILL.md' under 150-250 lines by extracting deep technical documentation into 'references/', and move large code templates or boilerplates into 'resources/templates/' or 'examples/' referenced via relative markdown links.",
+    "Why": "user explicit instruction: keep SKILL.md and frontmatter concise and modularize references and templates"
   },
   {
     "Rule_number": 20,
-    "Category": "ARCH",
-    "Instruction": "In Antigravity global MCP configurations ('~/.gemini/antigravity/mcp_config.json' and '~/.gemini/config/mcp_config.json'), 'agy.exe' does not respect '\"disabled\": true' inside the 'mcpServers' object and will still launch the child processes. To properly disable an MCP server, move it completely out of 'mcpServers' (e.g., into a separate '_disabledMcpServers' object).",
-    "Why": "diagnosed behavior: agy launches all commands defined under mcpServers regardless of disabled flag"
+    "Category": "UI",
+    "Instruction": "In circular clip-path theme switch animations using the View Transitions API, declare CSS keyframes ('theme-expand'/'theme-shrink') bound with CSS custom properties ('--theme-x', '--theme-y', '--theme-r') and explicit '::view-transition-group(root)' animation duration matching the transition (500ms), and synchronously toggle the document class ('classList.toggle('dark', isDark)') inside the 'startViewTransition' callback.",
+    "Why": "diagnosed root cause: prevents 1-frame theme flashes and premature 250ms UA transition cutoffs"
   },
   {
     "Rule_number": 21,
-    "Category": "ARCH",
-    "Instruction": "In navigation components (SiteNavbar, MobileNavDrawer), design specifications, and preview artifacts, do not render 'COCKPIT TOPOLOGY', uptime badges (such as '99.9%'), version tags, or availability/status badges; keep the brand lockup and navigation links clean without extraneous telemetry badges.",
-    "Why": "user explicit instruction: remove cockpit topology, uptime, version tags, and availability badges from navigation components"
+    "Category": "UI",
+    "Instruction": "In card header sections (such as 'ToolQuickCard' and diagnostic/spec cards), always configure header container rows with 'flex-wrap' and responsive gap spacing (e.g. 'flex flex-wrap items-center justify-between gap-2.5') so protocol tags, live status indicators, and privacy mode badges wrap cleanly across responsive viewports and localized languages without overflowing.",
+    "Why": "user explicit correction: prevent card header elements from overflowing"
   },
   {
     "Rule_number": 22,
-    "Category": "PROCESS",
-    "Instruction": "NEVER use 'read_url_content' to download binary files (images, raw HTML exports, or any non-text binary). It is a text-only fetcher that corrupts binary data and mangles file content. Always use 'run_command' with PowerShell 'Invoke-WebRequest -Uri <url> -OutFile <path>' to download any binary or raw file directly to disk.",
-    "Why": "diagnosed mistake: used read_url_content to download Stitch JPG and HTML files — JPGs were corrupted (unreadable), HTML was not the raw source. Fix: always use Invoke-WebRequest for binary downloads."
+    "Category": "ARCH",
+    "Instruction": "In the 'nextjs-plan' skill and modular implementation plans under 'docs/plan/', structure the roadmap into 7 phases: Phase 1 (Discovery & Route Architecture), Phase 2 (Environment, Testing & CI/CD), Phase 3 (System Health Probe /api/health), Phase 4 (Core Foundations: Env, i18n, Theme, Layout Shells, OTel), Phase 5 (Pages & Component Implementation Checklists with explicit sub-items for page.tsx, loading.tsx, error.tsx, generateMetadata, JSON-LD schema, and generateStaticParams), Phase 6 (Server Functions & Global SEO Metadata), and Phase 7 (Integrations & Production Release). Omit separate UI primitives phases, wireframes steps, React Compiler/Turbopack cache steps, manual NEXT_PUBLIC_ prefix rules, upfront translation catalog expansion steps, and prescriptive SiteHeader/SiteFooter designs.",
+    "Why": "user explicit requirements for 7-phase plan structure and streamlined non-prescriptive planning steps"
   },
   {
     "Rule_number": 23,
     "Category": "PROCESS",
-    "Instruction": "In design skills and workflows, do not call 'generate_image' or generate images directly to produce image assets. Instead, output the structured image prompt (including prompt description, aspect ratio, suggested filename, and target directory) directly to the user so the user can generate the image externally and place it in the project files, reducing token consumption.",
-    "Why": "user explicit requirement: do not generate images directly in design skills; output image prompts to user so user can generate externally and place in project files to reduce token consumption"
+    "Instruction": "In the active project workspace, immediately stage modified files in git (e.g., 'git add <file>' or 'git add .') after applying edits to prevent changes from being auto-reverted by Antigravity (agy), but never execute 'git commit' or 'git push' in the project workspace unless the user explicitly asks to commit or push. Only automatically commit and push changes inside the Obsidian repository ('d:/Scripts/Obsidian') when syncing skills.",
+    "Why": "user explicit requirements: stage changes in project workspace without committing unless asked, and auto-commit/push synced skill changes in the Obsidian repository only"
   },
   {
     "Rule_number": 24,
     "Category": "ARCH",
-    "Instruction": "When generating or creating a Next.js page component that is nested under a '[locale]' dynamic route segment and the project defines more than one locale in 'docs/project.json', always export 'generateStaticParams()' returning '{ locale }' for all supported locales (from '@/'i18n/routing' or 'supported_languages') to enable static pre-rendering across all locales.",
-    "Why": "user explicit requirement: configure nextjs-create-component to generate locale routes if generating a nextjs page and if there is more than one locale and the page is nested under locale dynamic route"
+    "Instruction": "In portfolio content, case studies, project showcases, and metadata: never generate synthetic/fake web metrics, fabricated testimonials, or invented placeholder GitHub repository cards ('dns-over-https-tester', 'webrtc-leak-detector', 'parsbert-ime-sentiment'); do not create internal project detail sub-pages ('/projects/[slug]'); feature strictly authentic engineering deliverables, genuine commercial/enterprise systems (Setayesh Parts, Bahar Trade — with no external link or DOI on the internal Bahar Trade IT card), and peer-reviewed published research papers (verified DOIs and ORCID) with an approachable, collaborative tone.",
+    "Why": "user explicit requirements: prioritize recruiter credibility with authentic deliverables and accurate external links"
   },
   {
     "Rule_number": 25,
     "Category": "ARCH",
-    "Instruction": "In Storybook configurations and component stories that render components using Next.js localized navigation or 'next-intl' ('Link', 'useRouter', 'useTranslations'), always wrap stories with 'NextIntlClientProvider' (supplying 'locale' and translation dictionaries from 'messages/[locale].json') and 'ProgressBarProvider' (both globally in '.storybook/preview.tsx' and within story decorators) to prevent 'No intl context found' runtime errors in Storybook.",
-    "Why": "diagnosed error: Storybook threw 'No intl context found' because Link component calls useRouter from next-intl which requires NextIntlClientProvider in context"
+    "Instruction": "Maintain strictly two environment files: '.env.example' (single source of truth template with production defaults, copied to '.env' in production) and '.env.development' (local development defaults), ignoring all '.env*' files in '.gitignore' except '.env.example' and mirroring any new variable in both files without custom startup env logging. Resolve Git commit hash and app version automatically at build time in 'next.config.ts' via 'package.json' and 'git rev-parse --short HEAD' without manual env vars or Docker build args.",
+    "Why": "user explicit requirements for two-file env architecture and automatic build-time version/hash resolution"
   },
   {
     "Rule_number": 26,
     "Category": "PROCESS",
-    "Instruction": "In component creation workflows, TDD cycles, and verification gates, execute test runner commands targeted strictly to the specific component's test and edge test files (e.g., 'pnpm test <path>/[ComponentName].test.tsx <path>/[ComponentName].edge.test.tsx') rather than running the full project test suite, and suppress verbose command output flags to minimize context token consumption.",
-    "Why": "user explicit requirement: configure skills to use targeted test execution and token optimization"
+    "Instruction": "In Next.js development setup workflows ('nextjs-dev-setup'), always generate a complete 'implementation_plan.md' artifact before applying changes and proceed directly with execution without stopping for manual confirmation, and automatically scaffold app icons and PWA manifests ('app/manifest.ts', 'app/favicon.ico', 'app/apple-icon.png', 'app/icon.png') in Stage 1 without asking about them in interview rounds.",
+    "Why": "user explicit preferences for direct execution after plan generation and automatic icon/manifest scaffolding"
   },
   {
     "Rule_number": 27,
-    "Category": "ARCH",
-    "Instruction": "In component development workflows ('nextjs-component-dev' / 'nextjs-create-component'), never add hardcoded text, fallback string placeholders, or in-file mock dictionary objects (e.g. 'DEFAULT_CONTENT') in component code. All user-facing strings, labels, badges, and CTAs must be extracted into the translation dictionary files ('messages/[locale].json') across all supported languages defined in 'docs/project.json', and consumed via next-intl ('getTranslations' in RSC, 'useTranslations' in Client Components).",
-    "Why": "user explicit requirement: configure nextjs-component-dev to not add i18n placeholders in components it creates and fill the dictionary files instead"
+    "Category": "STYLE",
+    "Instruction": "When adding notes, summaries, or bullet points to Obsidian vault markdown files based on user prompts, keep entries concise and strictly confined to what the user explicitly requested without adding unsolicited elaboration, marketing prose, or extended descriptions.",
+    "Why": "user explicit correction: keep Obsidian notes brief and strictly confined to requested points"
   },
   {
     "Rule_number": 28,
-    "Category": "PROCESS",
-    "Instruction": "Only create Storybook story files ('[ComponentName].stories.tsx') and execute Storybook verification tests when the 'nextjs-storybook-story' skill is specifically invoked or when explicitly requested by the user; do not automatically generate story files or run Storybook smoke/build tests during standard component development workflows ('nextjs-component-dev' / 'nextjs-create-component').",
-    "Why": "user explicit instruction: only create story for components if .agents/skills/nextjs-storybook-story is invoked or explicitly asked by user"
+    "Category": "CODE",
+    "Instruction": "In WordPress, WPGraphQL, and WooGraphQL integrations: inspect and return 'json.data' when present even if WordPress emits an HTTP 403 status header on customer Bearer tokens; validate JWT expiration ('exp') before attaching 'auth_token' headers; clear expired tokens in favor of guest or WordPress cookie sessions; and retry 401/403 rejected token requests without the Bearer header so cart and profile queries never fail.",
+    "Why": "diagnosed root causes: WordPress HTTP 403 status on valid customer GraphQL payloads and 5-minute default JWT expiry causing 403 errors on cart mutations"
   },
   {
     "Rule_number": 29,
-    "Category": "PROCESS",
-    "Instruction": "In the 'component-design' skill and UI discovery workflows, conduct the user interview in progressive adaptive rounds (Round 1: Purpose, Intent & Emotional Tone; Round 2: Spatial Hierarchy, Layout Grid & Focal Flow; Round 3: Interaction Dynamics, Media Accents & Ergonomics) so each subsequent round uses the user's previous answers as context to formulate and adjust targeted follow-up questions.",
-    "Why": "user explicit instruction: configure component-design skill to conduct interview in rounds so subsequent questions adapt based on user answers"
+    "Category": "CODE",
+    "Instruction": "When transferring a Next.js WooGraphQL cart to native WooCommerce checkout via 'fill_cart' ('/checkout/?fill_cart=productId:qty:variationId,...'), always query 'variation { node { id databaseId name price } }' in 'GET_CART_QUERY', omit the conflicting '?add-to-cart=' query parameter (which triggers 'WC_Form_Handler::add_to_cart_handler_variable' to reject variable products without 'attribute_pa_*' params and bounce empty carts back to Next.js '/cart'), and process 'fill_cart' inside the WordPress 'headless-redirects.php' MU-plugin on 'template_redirect' at priority 1 (extracting variation attributes via '$variation->get_variation_attributes()', calling 'WC()->session->set_customer_session_cookie(true)', and saving session data before 'wp_safe_redirect(wc_get_checkout_url())').",
+    "Why": "diagnosed root cause: missing variation field in GET_CART_QUERY, conflicting ?add-to-cart= parameter on variable products, and missing fill_cart handler in headless-redirects.php caused WooCommerce to fail adding variable products and redirect /checkout back to Next.js /cart"
   },
   {
     "Rule_number": 30,
-    "Category": "PROCESS",
-    "Instruction": "When creating or authoring AI skills ('SKILL.md'), strictly minimize the YAML frontmatter 'description' to 1-2 concise sentences stating WHAT the skill does and specific trigger phrases (never describing 'how' or internal execution mechanics), minimize the 'SKILL.md' file itself (under 150-250 lines) by extracting deep technical documentation into 'references/', and move large code templates, configurations, or boilerplates into separate files under 'resources/templates/' or 'examples/' referenced via relative markdown links.",
-    "Why": "user explicit instruction: configure skill-creator to minimize description of skills it creates, minimize skill file itself, separate into references, and move code templates to their own files and reference them"
-  },
-  {
-    "Rule_number": 31,
-    "Category": "UI",
-    "Instruction": "In circular clip-path theme switch animations using the View Transitions API, declare CSS keyframes ('theme-expand'/'theme-shrink') bound with CSS custom properties ('--theme-x', '--theme-y', '--theme-r') and explicit '::view-transition-group(root)' animation duration matching the transition (500ms), and synchronously toggle the document class ('classList.toggle('dark', isDark)') inside the 'startViewTransition' callback. This ensures GPU compositor execution from frame 0 and eliminates 1-frame theme flashes and mid-transition snapshot stutters.",
-    "Why": "diagnosed root cause: next-themes updates document class in asynchronous useEffect rather than synchronously in startViewTransition, and default 250ms UA ::view-transition-group duration caused premature animation cutoff and full-screen flash"
-  },
-  {
-    "Rule_number": 32,
-    "Category": "UI",
-    "Instruction": "In card header sections (such as 'ToolQuickCard' and diagnostic/spec cards), always configure header container rows with 'flex-wrap' and responsive gap spacing (e.g. 'flex flex-wrap items-center justify-between gap-2.5') so protocol tags, live status indicators, and privacy mode badges wrap cleanly across responsive viewports and localized languages without overflowing or truncating.",
-    "Why": "user explicit correction: elements in the header section of each card are overflowing configure them to wrap"
-  },
-  {
-    "Rule_number": 33,
     "Category": "ARCH",
-    "Instruction": "In the 'nextjs-plan' skill and modular implementation plans under 'docs/plan/', structure the roadmap into 7 chronological phases: Phase 1 (Discovery & Route Architecture), Phase 2 (Environment, Testing & CI/CD), Phase 3 (System Health Monitoring Probe /api/health), Phase 4 (Core Foundations: Env, i18n, Theme, Layout Shells, OTel), Phase 5 (Pages & Component Implementation Checklists), Phase 6 (Server Functions & Global SEO Metadata), and Phase 7 (Integrations & Production Release). Do not include a separate pre-made UI primitives phase so the agent creates unique designs. For every page outlined in Phase 5, enforce explicit sub-checklist tasks for page infrastructure and SEO: page view ('page.tsx'), loading skeleton ('loading.tsx'), route error boundary ('error.tsx'), metadata/OpenGraph ('generateMetadata'), structured data (JSON-LD schema), and 'generateStaticParams()' for dynamic/localized routes.",
-    "Why": "user explicit requirement: move health probe to phase 3, foundations to phase 4, remove phase 5 primitives to allow unique designs, and include page-level SEO, loading.tsx, error.tsx, and json-ld tasks under every page"
-  },
-  {
-    "Rule_number": 34,
-    "Category": "ARCH",
-    "Instruction": "In the 'nextjs-plan' skill and implementation plans: omit separate wireframes and interaction flows steps (component design is coupled directly with component dev); omit React Compiler or Turbopack cache configuration steps; omit manual 'NEXT_PUBLIC_' prefixing rules and service-specific API key steps (handled via setup wizards); omit separate upfront translation catalog expansion steps (dictionaries are populated dynamically during component dev); and keep layout header/footer steps non-prescriptive as strictly 'Design and develop SiteHeader' and 'Design and develop SiteFooter' without forcing pre-defined visual designs.",
-    "Why": "user explicit corrections: streamline planning steps, remove redundant boilerplate items, and keep layout design flexible without forcing pre-defined structures"
-  },
-  {
-    "Rule_number": 35,
-    "Category": "PROCESS",
-    "Instruction": "When executing page or component creation tasks, always update and check off completed items ('- [x]') in 'docs/plan/05-pages-and-components.md' for the created components, sections, or page infrastructure files (page.tsx, loading.tsx, error.tsx, generateMetadata, JSON-LD Schema, generateStaticParams), ticking off the parent page only when all its sub-items are completed.",
-    "Why": "user explicit requirement: configure AGENTS.md to check items in docs/plan/05-pages-and-components.md if the task is page or component creations"
-  },
-  {
-    "Rule_number": 36,
-    "Category": "PROCESS",
-    "Instruction": "After applying code edits or file changes, immediately stage the modified files in git (e.g., 'git add <file>' or 'git add .') to prevent changes from being automatically rejected or reverted by Antigravity (agy).",
-    "Why": "user explicit requirement: stage changes after applying them since changes are being auto rejected by agy"
-  },
-  {
-    "Rule_number": 37,
-    "Category": "PROCESS",
-    "Instruction": "In Next.js component development workflows ('nextjs-component-dev'), ensure the Next.js development server is active before developing by checking and tuning into any running instance via 'next-devtools' MCP server ('nextjs_index') or launching it in the background if absent, and utilize 'next-devtools' MCP tools ('nextjs_call', 'get_errors') to detect, diagnose, and resolve any runtime issues, compilation breaks, or hydration mismatches immediately after component authoring.",
-    "Why": "user explicit requirement: run dev server first or tune into it via next-devtools MCP server and use next-devtools MCP server to debug any issues after component dev"
-  },
-  {
-    "Rule_number": 38,
-    "Category": "ARCH",
-    "Instruction": "In portfolio content, case studies, metadata, and messaging, never generate synthetic/fake web metrics, fabricated client testimonials, or invented mock case studies; prioritize recruiter credibility by highlighting genuine, verifiable engineering deliverables, real-world systems (e.g. Setayesh Parts, Bahar Trade), real published research (DOIs), and authentic technical competencies with an approachable, warm, and collaborative tone.",
-    "Why": "user explicit requirement: value recruiters more, avoid fake web metrics and synthetic case studies, and present authentic projects"
-  },
-  {
-    "Rule_number": 39,
-    "Category": "ARCH",
-    "Instruction": "Maintain strictly two environment files: '.env.example' (the single source of truth template with documented load order, categories, and production defaults, which is copied/renamed to '.env' for production deployments) and '.env.development' (used locally for development). All '.env*' files must be excluded in '.gitignore' except '.env.example'. Whenever any new environment variable is introduced or required across any component, route, or integration, immediately mirror and document it in BOTH '.env.example' (with production defaults) and '.env.development' (with local development defaults). Do not add custom startup environment logging code as Next.js CLI natively reports loaded env files.",
-    "Why": "user explicit requirement: only two .env files (.env.example template for prod deployment and .env.development for dev), ignore all .env files except .env.example in git, mirror any new env variables in both env files, and omit custom startup logging since Next.js logs loaded env files natively"
-  },
-  {
-    "Rule_number": 40,
-    "Category": "ARCH",
-    "Instruction": "Do not render synthetic, non-existent, or placeholder GitHub repository cards (such as invented repos 'dns-over-https-tester', 'webrtc-leak-detector', 'parsbert-ime-sentiment') in showcase or projects sections. Feature strictly authentic engineering deliverables, genuine commercial/enterprise systems (Setayesh Parts, Bahar Trade), and peer-reviewed published research papers (with verified DOIs and author ORCID record).",
-    "Why": "user explicit correction: remove the project cards listed as github repositories because they are not real"
-  },
-  {
-    "Rule_number": 41,
-    "Category": "ARCH",
-    "Instruction": "Do not create or link to individual project detail sub-pages (e.g. '/projects/[slug]'); project cards and showcases must link strictly to authentic external deliverables (GitHub repository links, live project deployments, and peer-reviewed DOI/ORCID research publications).",
-    "Why": "user explicit requirement: remove individual project detail pages from plan and link only to authentic external deliverables (GitHub, live deployment, DOIs/ORCID)"
-  },
-  {
-    "Rule_number": 42,
-    "Category": "ARCH",
-    "Instruction": "Do not attach external links, live URLs, or research DOIs to 'Bahar Trade IT Automation and Infrastructure Management' card (it is internal enterprise IT infrastructure work with no associated public link).",
-    "Why": "user explicit correction: Bahar Trade IT Automation and Infrastructure Management has no associated external link or DOI"
-  },
-  {
-    "Rule_number": 43,
-    "Category": "UI",
-    "Instruction": "In footer components (SiteFooter, SinglePageFooter), design specifications, and translations, do not render systems observatory badges ('// SYSTEMS OBSERVATORY' / '// رصدخانه سیستم‌ها'), navigation section headings ('// QUICK NAVIGATION' / '// ناوبری'), or telemetry status badges ('SYSTEM_STATUS: OPERATIONAL' / 'وضعیت سامانه'); keep the brand lockup, navigation links, and footer layout clean and concise without extraneous telemetry badges.",
-    "Why": "user explicit instruction: remove // SYSTEMS OBSERVATORY, // QUICK NAVIGATION, and system status badge from footer"
-  },
-  {
-    "Rule_number": 44,
-    "Category": "PROCESS",
-    "Instruction": "In development setup and repository initialization workflows ('nextjs-dev-setup'), always generate and present a complete 'implementation_plan.md' artifact detailing all planned file creations, configurations, and packages before applying changes, and proceed directly with execution without stopping to wait for manual confirmation.",
-    "Why": "user explicit preference: always generate implementation_plan.md artifact before applying changes but execute directly every time without stopping for confirmation"
-  },
-  {
-    "Rule_number": 45,
-    "Category": "ARCH",
-    "Instruction": "Do not introduce manual override environment variables (such as 'NEXT_PUBLIC_GIT_COMMIT_SHA') or Docker build args for Git commit hash and application version; resolve them automatically and purely at build time in 'next.config.ts' via 'package.json' and 'git rev-parse --short HEAD' (with standard CI environment fallbacks like 'GITHUB_SHA').",
-    "Why": "user explicit instruction: do not create or require manual environment variable overrides for git hash and version"
-  },
-  {
-    "Rule_number": 46,
-    "Category": "PROCESS",
-    "Instruction": "In Next.js development setup workflows ('nextjs-dev-setup'), do not prompt or question the user in grilling/setup interview rounds about implementing app icons, Apple icons, or PWA manifests; automatically scaffold and configure them in Stage 1 ('app/manifest.ts', 'app/favicon.ico', 'app/apple-icon.png', 'app/icon.png') using the user-provided favicon asset and deduced project metadata.",
-    "Why": "user explicit instruction: there is no need to ask for implementation of this icon in grilling rounds"
-  },
-  {
-    "Rule_number": 47,
-    "Category": "STYLE",
-    "Instruction": "When adding notes, summaries, or bullet points to Obsidian vault markdown files based on user prompts, keep entries concise and strictly confined to what the user explicitly requested without adding unsolicited elaboration, marketing prose, or extended descriptions.",
-    "Why": "user explicit correction: make it more brief and just write the stuff mentioned with no need for extra descriptions"
-  },
-  {
-    "Rule_number": 48,
-    "Category": "TOOL",
-    "Instruction": "When searching and inspecting Next.js distribution documentation in 'node_modules/next/dist/docs' or researching codebase patterns, always use Codebase Memory MCP ('codebase-memory' tools like 'search_code', 'search_graph', 'get_code_snippet') to query and retrieve relevant docs efficiently.",
-    "Why": "user explicit instruction: for docs searching use codebase memory mcp"
-  },
-  {
-    "Rule_number": 49,
-    "Category": "CODE",
-    "Instruction": "In WordPress and WooCommerce WPGraphQL integrations, security filters or core REST authentication hooks may emit an HTTP 403 Forbidden status code on GraphQL requests containing 'Authorization: Bearer <token>' headers for customer/subscriber accounts, even while WPGraphQL successfully resolves and returns complete valid JSON data in the body. The Next.js fetcher must inspect and return 'json.data' when present rather than discarding payloads solely based on '!res.ok'.",
-    "Why": "diagnosed root cause: WordPress emitted HTTP 403 status header for customer role bearer token while returning valid viewer and customer profile data, causing Next.js fetcher to discard user session on page reload"
-  },
-  {
-    "Rule_number": 50,
-    "Category": "CODE",
-    "Instruction": "In WooCommerce JWT and WooGraphQL integrations, validate JWT expiration ('exp') before attaching 'auth_token' Bearer headers to GraphQL requests. Expired tokens must be cleared from cookies and dropped in favor of guest sessions, and the fetcher must retry 401/403 rejected token requests without the token to prevent WordPress from rejecting cart/catalog mutations with HTTP 403 'Internal server error'.",
-    "Why": "diagnosed root cause: WordPress default JWT expiration is 5 minutes while cookie maxAge is 7 days; sending expired Bearer tokens caused WordPress to return HTTP 403 Internal server error on cart mutations"
-  },
-  {
-    "Rule_number": 51,
-    "Category": "ARCH",
-    "Instruction": "In decoupled Next.js and WooCommerce architectures across different origins, browsers block cross-origin session cookies from persisting. When transferring users from the Next.js cart to native WooCommerce checkout, invoke the WooGraphQL 'checkout' mutation with the active 'wc_session' to convert the GraphQL cart into a native order and redirect to the generated 'checkout/order-pay/<id>/?key=...' URL, or seed direct cart URLs using '?add-to-cart=<id>&quantity=<qty>' rather than navigating to a bare '/checkout' URL which loads an empty session.",
-    "Why": "diagnosed root cause: bare redirects to WooCommerce /checkout send no session cookies from localhost/cross-origin frontend, presenting users with an empty cart instead of their selected products"
-  },
-  {
-    "Rule_number": 52,
-    "Category": "PROCESS",
-    "Instruction": "Never execute 'git commit' or 'git push' unless the user explicitly asks to commit or push in their prompt; only stage modified files (e.g. 'git add') after applying changes.",
-    "Why": "user explicit correction: from now on only commit changes when i say so"
-  },
-  {
-    "Rule_number": 53,
-    "Category": "ARCH",
-    "Instruction": "When developing or configuring WordPress with Docker Compose on Windows host environments, the primary root cause of severe slowness (15s–45s page loads) is that Docker volumes were bind-mounted from the Windows host NTFS filesystem ('C:\\', 'D:\\'). In Windows, Docker volumes MUST be Docker named volumes ('wp_core:/var/www/html' and 'wp_db_data:/var/lib/mysql') so that core WordPress files and the MySQL database reside natively inside the Linux ext4 filesystem environment (or the project must run inside the native WSL2 filesystem '/home/<user>/...'). Previous attempts to fix slowness by tweaking database settings, OPcache sizing, or container timeouts are invalid workarounds that do not solve the root I/O translation bottleneck. Only bind-mount active development folders (such as 'wp-content/mu-plugins') while keeping the core engine in named volumes.",
-    "Why": "user explicit finding and Docker community consensus: cross-OS 9P filesystem translation between Windows NTFS and Docker Linux VM is the true cause of slowness; previous database and container settings tweaks were invalid"
-  },
-  {
-    "Rule_number": 54,
-    "Category": "ARCH",
-    "Instruction": "In WordPress Docker deployments (both standalone and WooCommerce), the official 'wordpress:latest' base image only bundles 'mysqli' and 'mysqlnd' and lacks PHP's 'pdo_mysql' extension. Plugins utilizing Laravel Capsule or Eloquent ('Illuminate\\Database'), such as Persian WooCommerce ('persian-woocommerce') and Gateland, fail on 'admin_init' with 'Fatal error: Uncaught Illuminate\\Database\\QueryException: could not find driver' and cause WordPress to return HTTP 500 errors. Do NOT create custom Docker images just to install this extension; keep standard WordPress containers and patch them via Makefile deployment targets (e.g. 'make patch-pdo-mysql' or 'make patch-wordpress' running 'docker exec -u 0 <container> docker-php-ext-install pdo_mysql && docker exec <container> apache2ctl graceful') after the container is pulled and started.",
-    "Why": "user explicit instruction: do not create custom image just to run docker-php-ext-install; deploy standard wordpress containers and include makefile targets to patch the container after deployment"
+    "Instruction": "In WordPress Docker Compose environments: eliminate 15s–45s Windows host NTFS bind-mount I/O bottlenecks by storing WordPress core and MySQL in Linux Docker named volumes ('wp_core:/var/www/html' and 'wp_db_data:/var/lib/mysql') or inside the native WSL2 filesystem while only bind-mounting active development folders ('wp-content/mu-plugins'); and deploy standard 'wordpress:latest' containers without custom images, patching missing 'pdo_mysql' (required by Persian WooCommerce and Laravel Capsule plugins) via Makefile targets ('make patch-pdo-mysql' / 'make patch-wordpress').",
+    "Why": "user explicit findings and instructions on Docker Windows NTFS I/O bottleneck and Makefile pdo_mysql patching"
   }
 ]
-
-
-
-

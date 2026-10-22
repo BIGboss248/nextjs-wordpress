@@ -193,21 +193,29 @@ export interface AuthSessionResult {
  */
 export async function getAuthSessionAction(): Promise<AuthSessionResult> {
   const cookieStore = await cookies();
-  const token = cookieStore.get('auth_token')?.value;
+  const allCookies = cookieStore.getAll();
+  let token = cookieStore.get('auth_token')?.value;
+  const hasWpCookie = allCookies.some((c) => c.name.startsWith('wordpress_logged_in_'));
 
-  if (!token) {
+  if (!token && !hasWpCookie) {
     return { authenticated: false };
   }
 
-  const payload = parseJwtPayload(token);
-  if (payload?.exp && Date.now() >= payload.exp * 1000) {
-    return {
-      authenticated: false,
-      error: 'Token expired',
-    };
+  if (token) {
+    const payload = parseJwtPayload(token);
+    if (payload?.exp && Date.now() >= payload.exp * 1000) {
+      if (!hasWpCookie) {
+        return {
+          authenticated: false,
+          error: 'Token expired',
+        };
+      }
+      token = undefined;
+    }
   }
 
-  const res = await getUserProfile(token);
+  const cookieHeader = allCookies.map((c) => `${c.name}=${c.value}`).join('; ');
+  const res = await getUserProfile(token, cookieHeader);
   const hasViewer = Boolean(res.data?.viewer?.id || res.data?.viewer?.name);
   const hasCustomer = Boolean(res.data?.customer?.id && res.data.customer.id !== 'guest');
 

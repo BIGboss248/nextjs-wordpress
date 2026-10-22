@@ -374,9 +374,9 @@ export interface CartItemTransfer {
 
 /**
  * Retrieve the native WooCommerce checkout URL.
- * Passes all cart items via `fill_cart` (for multi-product transfer) and `add-to-cart`
- * (for native single-product fallback) directly to the WooCommerce checkout page,
- * allowing the user to select an address and see dynamic shipping calculations.
+ * Passes all cart items via `fill_cart` (supporting simple and variable products)
+ * directly to the WooCommerce checkout page, allowing the user to select an address
+ * and see dynamic shipping calculations.
  */
 export async function getCheckoutUrlAction(
   items?: CartItemTransfer[] | CartItemTransfer,
@@ -385,16 +385,44 @@ export async function getCheckoutUrlAction(
     phone?: string;
     firstName?: string;
     lastName?: string;
+    address1?: string;
+    city?: string;
   }
 ): Promise<{ url: string }> {
-  const base = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://shop.meetjamali.com';
+  const base = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://shop.local';
   const cleanBase = base.replace(/\/$/, '');
 
-  const itemList: CartItemTransfer[] = Array.isArray(items)
+  let itemList: CartItemTransfer[] = Array.isArray(items)
     ? items
     : items && items.databaseId
     ? [items]
     : [];
+
+  // Server-side fallback: if items were not provided or empty, inspect active WooGraphQL cart session
+  if (itemList.length === 0) {
+    try {
+      const { authToken, sessionToken } = await getSessionContext();
+      if (authToken || sessionToken) {
+        const cartRes = await getCart({ authToken, sessionToken });
+        const nodes = cartRes.data?.cart?.contents?.nodes || [];
+        itemList = nodes
+          .map((node) => {
+            const dbId = node.product?.node?.databaseId;
+            const varId = node.variation?.node?.databaseId;
+            return dbId
+              ? {
+                  databaseId: dbId,
+                  quantity: node.quantity || 1,
+                  ...(varId ? { variationId: varId } : {}),
+                }
+              : null;
+          })
+          .filter((item): item is CartItemTransfer => item !== null);
+      }
+    } catch {
+      // Fallback to empty itemList
+    }
+  }
 
   if (itemList.length === 0) {
     return {
@@ -402,7 +430,6 @@ export async function getCheckoutUrlAction(
     };
   }
 
-  const primaryItem = itemList[0];
   const fillCartParam = itemList
     .map(
       (item) =>
@@ -414,16 +441,7 @@ export async function getCheckoutUrlAction(
 
   const params = new URLSearchParams();
 
-  // Primary product fallback for core WooCommerce ?add-to-cart=
-  if (primaryItem.databaseId) {
-    params.set('add-to-cart', String(primaryItem.databaseId));
-    params.set('quantity', String(primaryItem.quantity || 1));
-    if (primaryItem.variationId) {
-      params.set('variation_id', String(primaryItem.variationId));
-    }
-  }
-
-  // Multi-item transfer parameter
+  // Multi-item & variation-aware transfer parameter handled by headless-redirects.php MU-plugin
   params.set('fill_cart', fillCartParam);
 
   // Pre-populate customer contact details if available
@@ -431,6 +449,8 @@ export async function getCheckoutUrlAction(
   if (customerInfo?.phone) params.set('billing_phone', customerInfo.phone);
   if (customerInfo?.firstName) params.set('billing_first_name', customerInfo.firstName);
   if (customerInfo?.lastName) params.set('billing_last_name', customerInfo.lastName);
+  if (customerInfo?.address1) params.set('billing_address_1', customerInfo.address1);
+  if (customerInfo?.city) params.set('billing_city', customerInfo.city);
 
   return {
     url: `${cleanBase}/checkout/?${params.toString()}`,

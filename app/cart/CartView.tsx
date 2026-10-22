@@ -74,15 +74,27 @@ export function CartView() {
       const cartItems = items
         .map((node) => {
           const dbId = node.product?.node?.databaseId;
-          return dbId ? { databaseId: dbId, quantity: node.quantity || 1 } : null;
+          const varId = node.variation?.node?.databaseId;
+          return dbId
+            ? {
+                databaseId: dbId,
+                quantity: node.quantity || 1,
+                ...(varId ? { variationId: varId } : {}),
+              }
+            : null;
         })
-        .filter((item): item is { databaseId: number; quantity: number } => item !== null);
+        .filter(
+          (item): item is { databaseId: number; quantity: number; variationId?: number } =>
+            item !== null
+        );
 
       const res = await getCheckoutUrlAction(cartItems, {
         email: authSession.email || billing.email,
         firstName: authSession.name?.split(' ')[0] || billing.firstName,
         lastName: authSession.name?.split(' ').slice(1).join(' ') || billing.lastName,
         phone: billing.phone,
+        address1: billing.address1,
+        city: billing.city,
       });
 
       if (res?.url) {
@@ -196,6 +208,9 @@ export function CartView() {
               <div className="divide-y divide-border">
                 {items.map((item) => {
                   const product = item.product?.node;
+                  const variation = item.variation?.node;
+                  const displayName = variation?.name || product?.name || 'Product';
+                  const displayPrice = variation?.price || product?.price || '—';
                   const imageSrc = product?.image?.sourceUrl;
                   const isUpdating = isMutating;
 
@@ -211,7 +226,7 @@ export function CartView() {
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={imageSrc}
-                              alt={product?.image?.altText || product?.name || 'Product'}
+                              alt={product?.image?.altText || displayName}
                               className="h-full w-full object-cover"
                             />
                           ) : (
@@ -221,10 +236,10 @@ export function CartView() {
 
                         <div className="space-y-1">
                           <h3 className="font-semibold text-base leading-snug">
-                            {product?.name || 'Product'}
+                            {displayName}
                           </h3>
                           <p className="text-xs text-muted-foreground font-mono">
-                            Price: {product?.price || '—'}
+                            Price: {displayPrice}
                           </p>
                         </div>
                       </div>

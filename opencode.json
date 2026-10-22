@@ -1,0 +1,46 @@
+{
+  "mcp": {
+    "servers": {
+      "next-devtools": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "next-devtools"
+        ]
+      },
+      "codebase-memory": {
+        "type": "local",
+        "command": [
+          "codebase-memory-mcp"
+        ]
+      },
+      "playwright": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "@playwright/mcp@latest"
+        ]
+      },
+      "chrome-devtools-mcp": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "chrome-devtools-mcp@latest"
+        ]
+      },
+      "seo": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "seo",
+          "mcp",
+          "serve"
+        ]
+      }
+    }
+  }
+}

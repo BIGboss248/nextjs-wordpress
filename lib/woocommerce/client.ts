@@ -241,12 +241,14 @@ export async function getViewer(
  * Fetch full WooCommerce customer and WordPress viewer profile
  */
 export async function getUserProfile(
-  authToken: string
+  authToken?: string,
+  cookie?: string
 ): Promise<WooCommerceQueryResult<UserProfileQueryResult>> {
   const res = await fetchWooCommerce<UserProfileQueryResult>(
     GET_USER_PROFILE_QUERY,
     {
       authToken,
+      cookie,
     }
   );
 

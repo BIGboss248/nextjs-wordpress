@@ -32,8 +32,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const [isMutating, setIsMutating] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
+  const defaultWpBase = (
+    process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://shop.local'
+  ).replace(/\/$/, '');
   const [checkoutUrl, setCheckoutUrl] = React.useState<string>(
-    'https://shop.meetjamali.com/checkout'
+    `${defaultWpBase}/checkout/`
   );
 
   const refreshCart = React.useCallback(async () => {
@@ -61,9 +64,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const cartItems = rawNodes
       .map((node) => {
         const dbId = node.product?.node?.databaseId;
-        return dbId ? { databaseId: dbId, quantity: node.quantity || 1 } : null;
+        const varId = node.variation?.node?.databaseId;
+        return dbId
+          ? {
+              databaseId: dbId,
+              quantity: node.quantity || 1,
+              ...(varId ? { variationId: varId } : {}),
+            }
+          : null;
       })
-      .filter((item): item is { databaseId: number; quantity: number } => item !== null);
+      .filter(
+        (item): item is { databaseId: number; quantity: number; variationId?: number } =>
+          item !== null
+      );
 
     if (cartItems.length > 0) {
       getCheckoutUrlAction(cartItems).then((res) => {

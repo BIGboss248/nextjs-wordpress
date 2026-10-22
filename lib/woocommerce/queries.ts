@@ -175,6 +175,16 @@ export const GET_CART_QUERY = `
               }
             }
           }
+          variation {
+            node {
+              id
+              databaseId
+              name
+              price
+              regularPrice
+              salePrice
+            }
+          }
         }
       }
       subtotal
@@ -203,6 +213,13 @@ export const ADD_TO_CART_MUTATION = `
         key
         quantity
         product {
+          node {
+            id
+            databaseId
+            name
+          }
+        }
+        variation {
           node {
             id
             databaseId

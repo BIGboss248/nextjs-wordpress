@@ -40,8 +40,16 @@ flowchart LR
 - [x] **2.3. Update Navbar / Header Auth Indicator**
   - Updated `app/page.tsx` to read `wordpress_logged_in_*` and `auth_token` cookies.
   - Dynamically renders "My Account" (`/account`) when logged in and "Account / Sign In" (`/login`) when unauthenticated.
-- [ ] **2.4. Verify Authentication Loop**
+- [x] **2.4. Verify Authentication Loop**
   - Test: Visit `/account` $\rightarrow$ redirect to `/my-account` $\rightarrow$ login $\rightarrow$ redirect to Next.js `/account` $\rightarrow$ customer dashboard renders.
+  - Verified end-to-end against `https://shop.local` with a test customer (`testcustomer`):
+    - `GET /account` (no cookies) $\rightarrow$ `307 /login?redirect_to=/account`
+    - `GET /login?redirect_to=/account` $\rightarrow$ `307 /my-account/?redirect_to=%2Faccount`
+    - Native WooCommerce login form POST $\rightarrow$ `302 /account`
+    - `GET /account` (with `wordpress_logged_in_*`) $\rightarrow$ `200`, renders the customer name, email, recent-orders empty state, and sign-out action from `GET_USER_PROFILE_QUERY`
+    - Logged-in `GET /login` $\rightarrow$ `307 /account` (login form bypassed)
+  - Fixed WPGraphQL 2.5.4+ cookie-authentication nonce requirement in `headless-redirects.php` via `graphql_cookie_auth_require_nonce`: server-to-server requests from Next.js (no `Origin`/`Referer`) may use WordPress cookies without a nonce, while browser-originated requests still require one. Previously the forwarded cookies were silently downgraded to guest.
+  - Runtime note: the WordPress named volume was missing `wp-graphql`, `wp-graphql-woocommerce`, and `mu-plugins/`. Redeployed them from `prod/WordPress/WordPress/wp-content/`, activated both plugins, and flushed rewrite rules; `/graphql` now responds `200`.
 
 ---
 
