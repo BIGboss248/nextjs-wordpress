@@ -42,15 +42,15 @@ services:
 
       # HTTP router (Redirects all HTTP traffic to HTTPS)
       - "traefik.http.routers.wordpress-http.entrypoints=web"
-      - "traefik.http.routers.wordpress-http.rule=Host(`${DOMAIN_NAME:-shop.meetjamali.com}`) && (PathPrefix(`/checkout`) || PathPrefix(`/my-account`) || PathPrefix(`/wp-admin`) || PathPrefix(`/wp-login.php`) || PathPrefix(`/wp-content`) || PathPrefix(`/wp-includes`) || PathPrefix(`/wp-json`) || PathPrefix(`/graphql`))"
+      - "traefik.http.routers.wordpress-http.rule=Host(`${DOMAIN_NAME:-shop.meetjamali.com}`) && (PathPrefix(`/checkout`) || PathPrefix(`/my-account`) || PathPrefix(`/wc-api`) || PathPrefix(`/wp-admin`) || PathPrefix(`/wp-login.php`) || PathPrefix(`/wp-content`) || PathPrefix(`/wp-includes`) || PathPrefix(`/wp-json`) || PathPrefix(`/graphql`) || QueryRegexp(`wc-ajax`, `.+`) || QueryRegexp(`wc-api`, `.+`))"
       - "traefik.http.routers.wordpress-http.priority=100"
       - "traefik.http.routers.wordpress-http.middlewares=wordpress-redirect@docker"
       - "traefik.http.middlewares.wordpress-redirect.redirectscheme.scheme=https"
       - "traefik.http.middlewares.wordpress-redirect.redirectscheme.permanent=true"
 
-      # HTTPS router (Routes secure traffic: intercepts checkout, account, admin, media, REST & GraphQL on same domain)
+      # HTTPS router (Routes secure traffic: intercepts checkout, account, admin, media, REST, GraphQL & WC AJAX/API on same domain)
       - "traefik.http.routers.wordpress-secure.entrypoints=websecure"
-      - "traefik.http.routers.wordpress-secure.rule=Host(`${DOMAIN_NAME:-shop.meetjamali.com}`) && (PathPrefix(`/checkout`) || PathPrefix(`/my-account`) || PathPrefix(`/wp-admin`) || PathPrefix(`/wp-login.php`) || PathPrefix(`/wp-content`) || PathPrefix(`/wp-includes`) || PathPrefix(`/wp-json`) || PathPrefix(`/graphql`))"
+      - "traefik.http.routers.wordpress-secure.rule=Host(`${DOMAIN_NAME:-shop.meetjamali.com}`) && (PathPrefix(`/checkout`) || PathPrefix(`/my-account`) || PathPrefix(`/wc-api`) || PathPrefix(`/wp-admin`) || PathPrefix(`/wp-login.php`) || PathPrefix(`/wp-content`) || PathPrefix(`/wp-includes`) || PathPrefix(`/wp-json`) || PathPrefix(`/graphql`) || QueryRegexp(`wc-ajax`, `.+`) || QueryRegexp(`wc-api`, `.+`))"
       - "traefik.http.routers.wordpress-secure.priority=100"
       - "traefik.http.routers.wordpress-secure.tls=true"
       - "traefik.http.routers.wordpress-secure.tls.certresolver=${CERT_RESOLVER:-myresolver}"

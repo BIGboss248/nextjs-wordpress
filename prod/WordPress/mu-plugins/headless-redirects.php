@@ -10,7 +10,21 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * 0. Headless Cart Bridge (fill_cart):
+ * 0a. Route WooCommerce AJAX endpoints (`wc-ajax`) through `/checkout/`:
+ * By default, WooCommerce generates `/?wc-ajax=%%endpoint%%` (root path `/`).
+ * In our shared-domain Traefik architecture, `/` is routed to Next.js, which
+ * responds with HTML instead of WooCommerce JSON fragments—leaving `.blockUI`
+ * spinning infinitely on `/checkout/` when `update_order_review` or `checkout` runs.
+ * Rewriting `wc-ajax` URLs to `/checkout/?wc-ajax=...` guarantees Traefik's
+ * `PathPrefix(/checkout)` rule routes all checkout AJAX calls to WordPress.
+ */
+add_filter('woocommerce_ajax_get_endpoint', function ($endpoint, $request) {
+    $req = !empty($request) ? $request : '%%endpoint%%';
+    return '/checkout/?wc-ajax=' . $req;
+}, 10, 2);
+
+/**
+ * 0b. Headless Cart Bridge (fill_cart):
  * Synchronizes items (Simple & Variable products) and optional customer billing info
  * from the Next.js cart into the native WooCommerce PHP session before checkout renders.
  */
