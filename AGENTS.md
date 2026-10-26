@@ -1,5 +1,18 @@
 # Workspace Agent Rules & Mandatory Skill Enforcement
 
+> [!WARNING]
+> ### CRITICAL: Next.js Context is Outdated — Mandatory Local Documentation Lookup
+> AI agent pre-trained context and knowledge regarding Next.js is inherently outdated. Framework APIs, App Router conventions, caching directives (`'use cache'`), Server Actions, Turbopack, and configuration flags evolve rapidly.
+>
+> **For ANY Next.js tasks**, agents **MUST NOT** rely on pre-trained assumptions or memory. You **MUST ALWAYS** inspect and search the local Next.js documentation bundled directly in:
+> ```
+> node_modules\next\dist\docs
+> ```
+> (or `node_modules/next/dist/docs/`).
+> Use `codebase-memory` MCP tools (`search_code`, `search_graph`, `get_code_snippet`) to search `node_modules\next\dist\docs` for authoritative, version-exact API signatures, directives, and usage patterns before writing or modifying any Next.js code.
+
+---
+
 ## 1. Mandatory Component Creation Workflow (`nextjs-component-dev`)
 
 Whenever you are asked to create, scaffold, build, or implement **any new React or Next.js component** (including UI sections, cards, widgets, forms, or layout elements — whether requested directly by the user, required while building a page, or executed from `docs/plan/`):

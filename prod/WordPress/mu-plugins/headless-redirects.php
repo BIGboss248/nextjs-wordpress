@@ -24,6 +24,37 @@ add_filter('woocommerce_ajax_get_endpoint', function ($endpoint, $request) {
 }, 10, 2);
 
 /**
+ * 0a-2. Route WooCommerce API / payment-gateway callbacks (`wc-api`) through `/checkout/`:
+ * Gateways build their return & IPN URLs with `WC()->api_request_url()`, which yields
+ * `/wc-api/<Gateway>/`, `/index.php/wc-api/<Gateway>/` or `/?wc-api=<Gateway>`
+ * depending on the permalink structure. When those land on Next.js (shared domain)
+ * they 404 and the order is never completed. `WC_API::handle_api_requests()` reads
+ * `$_GET['wc-api']` on `parse_request` for ANY path, so `/checkout/?wc-api=<Gateway>`
+ * is handled identically and is always routed to WordPress by Traefik's
+ * `PathPrefix(/checkout)` rule. (Next.js `middleware.ts` also 307-redirects any
+ * hardcoded `wc-api` URL that still reaches the storefront.)
+ */
+add_filter('woocommerce_api_request_url', function ($url, $request, $ssl) {
+    if (is_null($ssl)) {
+        $scheme = wp_parse_url(home_url(), PHP_URL_SCHEME);
+    } else {
+        $scheme = $ssl ? 'https' : 'http';
+    }
+
+    $args = [];
+    $query = wp_parse_url($url, PHP_URL_QUERY);
+    if (!empty($query)) {
+        wp_parse_str($query, $args);
+        unset($args['wc-api']);
+    }
+
+    return add_query_arg(
+        array_merge(['wc-api' => $request], $args),
+        home_url('/checkout/', $scheme)
+    );
+}, 99, 3);
+
+/**
  * 0b. Headless Cart Bridge (fill_cart):
  * Synchronizes items (Simple & Variable products) and optional customer billing info
  * from the Next.js cart into the native WooCommerce PHP session before checkout renders.
