@@ -178,5 +178,12 @@
     "Category": "ARCH",
     "Instruction": "In WordPress Docker Compose environments: eliminate 15s–45s Windows host NTFS bind-mount I/O bottlenecks by storing WordPress core and MySQL in Linux Docker named volumes ('wp_core:/var/www/html' and 'wp_db_data:/var/lib/mysql') or inside the native WSL2 filesystem while only bind-mounting active development folders ('wp-content/mu-plugins'); and deploy standard 'wordpress:latest' containers without custom images, patching missing 'pdo_mysql' (required by Persian WooCommerce and Laravel Capsule plugins) via Makefile targets ('make patch-pdo-mysql' / 'make patch-wordpress').",
     "Why": "user explicit findings and instructions on Docker Windows NTFS I/O bottleneck and Makefile pdo_mysql patching"
+  },
+  {
+    "Rule_number": 31,
+    "Category": "CODE",
+    "Instruction": "In the shared-domain headless WooCommerce setup, never rely solely on Traefik rules to deliver payment-gateway callbacks ('wc-api'): always filter 'woocommerce_api_request_url' in 'headless-redirects.php' to emit '/checkout/?wc-api=<Gateway>' (WooCommerce handles '$_GET[\"wc-api\"]' on any path during 'parse_request'), and keep the Next.js 'middleware.ts' safety net that 307-redirects '/wc-api/*', '/index.php/wc-api/*' and '?wc-api=' requests to '/checkout/?wc-api=...' (method-preserving, query-preserving, skipping '/checkout' to avoid loops).",
+    "Why": "diagnosed root cause: gateway return/IPN URLs ('/wc-api/<Gateway>/', '/index.php/wc-api/...', '/?wc-api=') reached Next.js and returned 404, so orders were never completed",
+    "Issue": "local-triage (GitHub auth unavailable)"
   }
 ]

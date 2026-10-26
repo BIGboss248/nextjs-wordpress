@@ -1,23 +1,22 @@
 <#
 .SYNOPSIS
-    Initializes repository GitHub Issues infrastructure (issue templates and triage labels).
+    Initializes repository GitHub Issues triage infrastructure (issue templates and triage labels).
 
 .DESCRIPTION
-    Checks for the existence of .github/ISSUE_TEMPLATE/ and copies starter bug report templates.
-    Ensures that standard triage labels ('bug', 'agent-triage', 'self-repair', 'verified') are created
+    Scaffolds .github/ISSUE_TEMPLATE/bug_report.yml and .github/ISSUE_TEMPLATE/config.yml from skill templates.
+    Ensures standard triage labels ('bug', 'agent-triage', 'self-repair', 'verified') are created
     in the remote GitHub repository using GitHub CLI ('gh') if available and authenticated.
 
 .EXAMPLE
-    powershell -ExecutionPolicy Bypass -File .agents/skills/github-triage/scripts/init_triage_infra.ps1
+    powershell -ExecutionPolicy Bypass -File .agents/skills/setup-repository/scripts/init_triage_infra.ps1
 #>
 
 [CmdletBinding()]
 param ()
 
-# Prevent native command stderr from triggering terminating errors
 $ErrorActionPreference = "Continue"
 
-Write-Host "==> Checking GitHub Issues infrastructure..." -ForegroundColor Cyan
+Write-Host "==> Initializing GitHub Triage Infrastructure..." -ForegroundColor Cyan
 
 # 1. Resolve repository root
 $repoRoot = (Get-Location).Path
@@ -34,8 +33,12 @@ $sourceDir = Join-Path $PSScriptRoot "../resources/templates"
 
 $bugTemplateDest = Join-Path $templatesDir "bug_report.yml"
 if (-not (Test-Path $bugTemplateDest)) {
-    $bugTemplateSrc = Join-Path $sourceDir "bug_report.yml"
-    if (Test-Path $bugTemplateSrc) {
+    $bugCandidates = @(
+        (Join-Path $sourceDir "bug_report.yml.template"),
+        (Join-Path $sourceDir "bug_report.yml")
+    )
+    $bugTemplateSrc = $bugCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if ($bugTemplateSrc) {
         Copy-Item -Path $bugTemplateSrc -Destination $bugTemplateDest -Force
         Write-Host "Installed: .github/ISSUE_TEMPLATE/bug_report.yml" -ForegroundColor Green
     }
@@ -45,8 +48,13 @@ if (-not (Test-Path $bugTemplateDest)) {
 
 $configTemplateDest = Join-Path $templatesDir "config.yml"
 if (-not (Test-Path $configTemplateDest)) {
-    $configTemplateSrc = Join-Path $sourceDir "config.yml"
-    if (Test-Path $configTemplateSrc) {
+    $configCandidates = @(
+        (Join-Path $sourceDir "issue_config.yml.template"),
+        (Join-Path $sourceDir "config.yml.template"),
+        (Join-Path $sourceDir "config.yml")
+    )
+    $configTemplateSrc = $configCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if ($configTemplateSrc) {
         Copy-Item -Path $configTemplateSrc -Destination $configTemplateDest -Force
         Write-Host "Installed: .github/ISSUE_TEMPLATE/config.yml" -ForegroundColor Green
     }
@@ -54,21 +62,32 @@ if (-not (Test-Path $configTemplateDest)) {
     Write-Host "Existing config found: .github/ISSUE_TEMPLATE/config.yml" -ForegroundColor Gray
 }
 
-# 4. Check GitHub CLI and ensure labels exist
+# 4. Check GitHub CLI and ensure triage labels exist
 $gh = Get-Command "gh" -ErrorAction SilentlyContinue
 if (-not $gh) {
     Write-Host "NOTE: GitHub CLI ('gh') is not installed in PATH. Skipping remote label provisioning." -ForegroundColor Yellow
     exit 0
 }
 
-# Check gh auth status safely
+# Check gh auth status safely (with automatic fallback to Git Credential Manager)
+$null = & gh auth status 2>$null
+if ($LASTEXITCODE -ne 0 -and -not $env:GH_TOKEN) {
+    $credInput = "protocol=https`nhost=github.com`n`n"
+    $credOut = $credInput | git credential fill 2>$null
+    foreach ($line in $credOut) {
+        if ($line -match "^password=(.+)$") {
+            $env:GH_TOKEN = $matches[1].Trim()
+            break
+        }
+    }
+}
+
 $null = & gh auth status 2>$null
 if ($LASTEXITCODE -ne 0) {
     Write-Host "NOTE: GitHub CLI ('gh') is not currently authenticated. Local templates scaffolded successfully; skipping remote label provisioning." -ForegroundColor Yellow
     exit 0
 }
 
-# Define required triage labels
 $labels = @(
     @{ Name = "bug"; Color = "d73a4a"; Description = "Something isn't working" },
     @{ Name = "agent-triage"; Color = "0e8a16"; Description = "Triaged and managed by AI agent" },
@@ -90,5 +109,5 @@ foreach ($lbl in $labels) {
     }
 }
 
-Write-Host "GitHub Issues infrastructure successfully initialized." -ForegroundColor Green
+Write-Host "GitHub Triage infrastructure successfully initialized." -ForegroundColor Green
 exit 0
