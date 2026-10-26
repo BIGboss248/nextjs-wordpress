@@ -30,6 +30,7 @@ const gitCommitHash = getGitCommitHash();
 const appVersion = packageJson.version || "0.1.0";
 
 const nextConfig: NextConfig = {
+  skipTrailingSlashRedirect: true,
   output: "standalone",
   deploymentId: `${appVersion}-${gitCommitHash}`,
   env: {

@@ -185,5 +185,12 @@
     "Instruction": "In the shared-domain headless WooCommerce setup, never rely solely on Traefik rules to deliver payment-gateway callbacks ('wc-api'): always filter 'woocommerce_api_request_url' in 'headless-redirects.php' to emit '/checkout/?wc-api=<Gateway>' (WooCommerce handles '$_GET[\"wc-api\"]' on any path during 'parse_request'), and keep the Next.js 'middleware.ts' safety net that 307-redirects '/wc-api/*', '/index.php/wc-api/*' and '?wc-api=' requests to '/checkout/?wc-api=...' (method-preserving, query-preserving, skipping '/checkout' to avoid loops).",
     "Why": "diagnosed root cause: gateway return/IPN URLs ('/wc-api/<Gateway>/', '/index.php/wc-api/...', '/?wc-api=') reached Next.js and returned 404, so orders were never completed",
     "Issue": "local-triage (GitHub auth unavailable)"
+  },
+  {
+    "Rule_number": 32,
+    "Category": "ARCH",
+    "Instruction": "In Next.js App Router applications handling payment gateway callbacks or webhooks with trailing slashes, always configure 'skipTrailingSlashRedirect: true' in 'next.config.ts' so incoming trailing slash requests (e.g. '/wc-api/<Gateway>/') reach 'middleware.ts' directly without being preempted by Next.js's default 308 permanent trailing slash redirect, and add '<rootDir>/.next/' to 'modulePathIgnorePatterns' in 'jest.config.ts' to avoid Jest Haste module naming collisions with standalone output.",
+    "Why": "diagnosed root cause: Next.js defaults to issuing a 308 redirect on trailing slashes before route middleware, dropping payment callbacks or mutating methods, and Jest Haste map collides with package.json in .next/standalone",
+    "Issue": "#2"
   }
 ]
