@@ -185,5 +185,35 @@
     "Instruction": "In the shared-domain headless WooCommerce setup, never rely solely on Traefik rules to deliver payment-gateway callbacks ('wc-api'): always filter 'woocommerce_api_request_url' in 'headless-redirects.php' to emit '/checkout/?wc-api=<Gateway>' (WooCommerce handles '$_GET[\"wc-api\"]' on any path during 'parse_request'), and keep the Next.js 'middleware.ts' safety net that 307-redirects '/wc-api/*', '/index.php/wc-api/*' and '?wc-api=' requests to '/checkout/?wc-api=...' (method-preserving, query-preserving, skipping '/checkout' to avoid loops).",
     "Why": "diagnosed root cause: gateway return/IPN URLs ('/wc-api/<Gateway>/', '/index.php/wc-api/...', '/?wc-api=') reached Next.js and returned 404, so orders were never completed",
     "Issue": "local-triage (GitHub auth unavailable)"
+  },
+  {
+    "Rule_number": 32,
+    "Category": "TOOL",
+    "Instruction": "Always verify the 'codebase-memory-mcp' binary is installed and registered before relying on its MCP tools - install it with 'npm install -g --allow-scripts=codebase-memory-mcp codebase-memory-mcp' (the npm postinstall is otherwise blocked), register it in workspace 'mcp.json', '.vscode/mcp.json' and 'opencode.json' plus the AGY global configs, keep 'auto_watch=false', run 'index_repository' before querying, and use 'codebase-memory-mcp cli <tool>' when the current agent session started before the installation.",
+    "Why": "diagnosed root cause: the MCP server was absent from PATH, so every codebase-memory tool silently failed and the harness session could not load it"
+  },
+  {
+    "Rule_number": 33,
+    "Category": "TOOL",
+    "Instruction": "On this Windows host, never bind the Next.js dev server to TCP ports 2929-3028 (including 3000 and 3001) because Hyper-V/WinNAT reserves that range - run 'next dev -p 4000' and point the Caddy dev proxy at 'host.docker.internal:4000'.",
+    "Why": "diagnosed root cause: binding 0.0.0.0:3000 failed with EACCES because 3000 falls inside the Windows excluded port range 2929-3028"
+  },
+  {
+    "Rule_number": 34,
+    "Category": "CODE",
+    "Instruction": "In 'graphql_jwt_auth_expire' filters, always return a token lifetime in seconds (e.g. 'DAY_IN_SECONDS'), never an absolute timestamp - wp-graphql-jwt-authentication adds the filtered value to the issued-at time.",
+    "Why": "diagnosed root cause: returning 'time() + DAY_IN_SECONDS' produced a JWT with a ~56-year lifetime"
+  },
+  {
+    "Rule_number": 35,
+    "Category": "TOOL",
+    "Instruction": "After creating, recreating, or upgrading the WordPress container, always run 'pwsh ./prod/WordPress/patch-wordpress.ps1' - it reinstalls the container-layer 'pdo_mysql' extension and WP-CLI, because a recreated container loses both and Persian WooCommerce then throws 'could not find driver' with HTTP 500 on /wp-admin/.",
+    "Why": "diagnosed root cause: the WordPress admin panel returned 500 after container recreation because the compiled pdo_mysql extension was not persisted in the named volume"
+  },
+  {
+    "Rule_number": 36,
+    "Category": "CODE",
+    "Instruction": "In Next.js shared-domain WooCommerce storefronts, always set 'skipTrailingSlashRedirect: true' in 'next.config.ts' and let 'middleware.ts' issue a method-preserving 307 for '/wc-api/*' callbacks - otherwise Next.js returns 308 before middleware for trailing-slash gateway returns, breaking POST verification.",
+    "Why": "diagnosed root cause: POST /wc-api/foo/ returned 308 before middleware executed; the gateway callback never reached WordPress"
   }
 ]
